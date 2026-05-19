@@ -31,10 +31,10 @@ export default function CreateTournament() {
 
   const [name, setName] = useState('')
   const [type, setType] = useState('')
-  const [game, setGame] = useState('')
+  const [game, setGame] = useState('Custom')
   const [format, setFormat] = useState('bo1')
   const [timerMinutes, setTimerMinutes] = useState(30)
-  const [customTimer, setCustomTimer] = useState(false)
+  const [customTimer, setCustomTimer] = useState(true)
   const [playerInput, setPlayerInput] = useState('')
   const [players, setPlayers] = useState([])
 
