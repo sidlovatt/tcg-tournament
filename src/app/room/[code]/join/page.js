@@ -1,10 +1,11 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 export default function JoinPage() {
   const { code } = useParams()
+  const router = useRouter()
   const [tournament, setTournament] = useState(null)
   const [players, setPlayers] = useState([])
   const [name, setName] = useState('')
@@ -66,13 +67,8 @@ export default function JoinPage() {
   if (error && !tournament) return <Screen><p className="text-red-400">{error}</p></Screen>
 
   if (tournament?.status !== 'waiting') {
-    return (
-      <Screen>
-        <p className="text-2xl mb-2">🔒</p>
-        <p className="text-slate-300 font-semibold">Tournament has started</p>
-        <p className="text-slate-500 text-sm mt-1">Registration is closed</p>
-      </Screen>
-    )
+    router.replace(`/room/${code}/play`)
+    return <Screen><p className="text-slate-500">Redirecting...</p></Screen>
   }
 
   return (

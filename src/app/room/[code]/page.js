@@ -316,12 +316,16 @@ export default function RoomPage() {
 
           <div className="bg-slate-800 rounded-xl p-4 space-y-3">
             <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Join Links</h2>
-            {tournament.current_round === 0 && (
-              <div className="text-center">
-                <p className="text-sm font-bold text-slate-200 mb-2 uppercase tracking-wide">Players</p>
-                <QRCodeDisplay url={`${origin}/room/${code}/play`} code={code.toUpperCase()} small />
-              </div>
-            )}
+            <div className="text-center">
+              <p className="text-sm font-bold text-slate-200 mb-2 uppercase tracking-wide">
+                {tournament.current_round === 0 ? 'Players' : 'Play'}
+              </p>
+              <QRCodeDisplay
+                url={`${origin}/room/${code}/${tournament.current_round === 0 ? 'join' : 'play'}`}
+                code={code.toUpperCase()}
+                small
+              />
+            </div>
             <div className="text-center">
               <p className="text-sm font-bold text-slate-200 mb-2 uppercase tracking-wide">Spectators</p>
               <QRCodeDisplay url={`${origin}/room/${code}/standings`} code={code.toUpperCase()} small />
