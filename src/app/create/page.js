@@ -90,17 +90,13 @@ export default function CreateTournament() {
     }
   }
 
-  function addPlayer() {
-    const trimmed = playerInput.trim()
-    if (!trimmed) return
-    if (players.includes(trimmed)) { setError('Name already added'); return }
-    setPlayers(prev => [...prev, trimmed])
-    setPlayerInput('')
+  function handlePlayerText(e) {
+    const val = e.target.value
+    setPlayerInput(val)
+    const names = val.split('\n').map(n => n.trim()).filter(Boolean)
+    setPlayers([...new Set(names)])
     setError('')
   }
-
-  function removePlayer(i) { setPlayers(prev => prev.filter((_, idx) => idx !== i)) }
-  function handlePlayerKeyDown(e) { if (e.key === 'Enter') { e.preventDefault(); addPlayer() } }
 
   async function handleQrAddPlayer(e) {
     e.preventDefault()
@@ -304,30 +300,17 @@ export default function CreateTournament() {
             {signupMode === 'manual' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Add Players ({players.length} added)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Player name"
-                      value={playerInput}
-                      onChange={e => { setPlayerInput(e.target.value); setError('') }}
-                      onKeyDown={handlePlayerKeyDown}
-                      className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-violet-500"
-                    />
-                    <button onClick={addPlayer} className="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-4 rounded-xl transition-colors">Add</button>
-                  </div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Players{players.length > 0 ? ` (${players.length})` : ''}
+                  </label>
+                  <textarea
+                    placeholder={'Player 1\nPlayer 2\nPlayer 3...'}
+                    value={playerInput}
+                    onChange={handlePlayerText}
+                    rows={6}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-violet-500 resize-none"
+                  />
                 </div>
-
-                {players.length > 0 && (
-                  <div className="space-y-2">
-                    {players.map((p, i) => (
-                      <div key={i} className="flex items-center justify-between bg-slate-800 rounded-lg px-4 py-2">
-                        <span className="text-slate-200"><span className="text-slate-500 mr-2 text-sm">#{i + 1}</span>{p}</span>
-                        <button onClick={() => removePlayer(i)} className="text-slate-500 hover:text-red-400 text-lg">×</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 {players.length < 2 && <p className="text-slate-500 text-sm text-center">Add at least 2 players to continue</p>}
               </>
