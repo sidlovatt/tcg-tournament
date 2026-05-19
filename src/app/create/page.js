@@ -296,7 +296,7 @@ export default function CreateTournament() {
                 Manual Entry
               </button>
               <button
-                onClick={() => setSignupMode('qr')}
+                onClick={() => { setSignupMode('qr'); if (!qrTournamentCode) createQrTournament() }}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${signupMode === 'qr' ? 'bg-slate-700 text-slate-100' : 'text-slate-500 hover:text-slate-300'}`}
               >
                 QR Sign-up
@@ -326,23 +326,9 @@ export default function CreateTournament() {
             {/* QR sign-up mode */}
             {signupMode === 'qr' && (
               <>
-                {!qrTournamentCode ? (
-                  <div className="space-y-4">
-                    <div className="bg-slate-800 rounded-xl p-4 text-sm text-slate-400 space-y-2">
-                      <p className="text-slate-300 font-medium">How QR sign-up works:</p>
-                      <p>1. Creates your tournament room immediately</p>
-                      <p>2. Players scan a QR code and type their name</p>
-                      <p>3. You see names appear live · start when everyone&apos;s in</p>
-                    </div>
-                    <button
-                      onClick={createQrTournament}
-                      disabled={loading}
-                      className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white font-semibold py-3 rounded-xl transition-colors"
-                    >
-                      {loading ? 'Creating...' : 'Generate Sign-up QR Code'}
-                    </button>
-                  </div>
-                ) : (
+                {loading && !qrTournamentCode ? (
+                  <div className="text-center py-6 text-slate-500">Creating room...</div>
+                ) : qrTournamentCode ? (
                   <div className="space-y-4">
                     <div className="flex flex-col items-center gap-3">
                       <p className="text-slate-400 text-sm">Players scan this to join:</p>
@@ -403,7 +389,7 @@ export default function CreateTournament() {
                       {qrAddError && <p className="text-red-400 text-xs mt-1">{qrAddError}</p>}
                     </div>
                   </div>
-                )}
+                ) : null}
               </>
             )}
 
