@@ -100,17 +100,24 @@ export default function CreateTournament() {
 
   async function handleQrAddPlayer(e) {
     e.preventDefault()
-    const name = qrAddName.trim()
-    if (!name || !qrTournamentCode) return
+    if (!qrTournamentCode) return
+    const names = qrAddName.split('\n').map(n => n.trim()).filter(Boolean)
+    if (!names.length) return
     setQrAddLoading(true)
     setQrAddError('')
-    const res = await fetch(`/api/tournaments/${qrTournamentCode}/players`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    })
-    const data = await res.json()
-    if (!res.ok) setQrAddError(data.error || 'Failed')
+    const existing = new Set(qrPlayers.map(p => p.name.toLowerCase()))
+    const toAdd = [...new Set(names)].filter(n => !existing.has(n.toLowerCase()))
+    const errors = []
+    for (const name of toAdd) {
+      const res = await fetch(`/api/tournaments/${qrTournamentCode}/players`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      const data = await res.json()
+      if (!res.ok) errors.push(data.error || name)
+    }
+    if (errors.length) setQrAddError(`Failed: ${errors.join(', ')}`)
     else setQrAddName('')
     setQrAddLoading(false)
   }
@@ -377,21 +384,20 @@ export default function CreateTournament() {
                           ))}
                         </div>
                       )}
-                      <form onSubmit={handleQrAddPlayer} className="flex gap-2 mt-3">
-                        <input
-                          type="text"
-                          placeholder="Add player manually..."
+                      <form onSubmit={handleQrAddPlayer} className="space-y-2 mt-3">
+                        <textarea
+                          placeholder={'Player 1\nPlayer 2\nPlayer 3...'}
                           value={qrAddName}
                           onChange={e => { setQrAddName(e.target.value); setQrAddError('') }}
-                          maxLength={30}
-                          className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-600 text-sm focus:outline-none focus:border-violet-500"
+                          rows={3}
+                          className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-600 text-sm focus:outline-none focus:border-violet-500 resize-none"
                         />
                         <button
                           type="submit"
                           disabled={qrAddLoading || !qrAddName.trim()}
-                          className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                          className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors"
                         >
-                          {qrAddLoading ? '...' : 'Add'}
+                          {qrAddLoading ? 'Adding...' : 'Add Players'}
                         </button>
                       </form>
                       {qrAddError && <p className="text-red-400 text-xs mt-1">{qrAddError}</p>}
