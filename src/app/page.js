@@ -117,20 +117,20 @@ export default function Home() {
             </BrowserFrame>
           </div>
 
-          {/* Mockup 2: Cast / TV view */}
+          {/* Mockup 2: Player phone view (centre) */}
+          <div className="space-y-2 flex flex-col items-center">
+            <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Player&apos;s Phone</p>
+            <PhoneFrame>
+              <PlayerMockup />
+            </PhoneFrame>
+          </div>
+
+          {/* Mockup 3: Cast / TV view */}
           <div className="space-y-2">
             <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Cast to TV</p>
             <BrowserFrame>
               <CastMockup />
             </BrowserFrame>
-          </div>
-
-          {/* Mockup 3: Player phone view */}
-          <div className="space-y-2">
-            <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Player&apos;s Phone</p>
-            <PhoneFrame>
-              <PlayerMockup />
-            </PhoneFrame>
           </div>
         </div>
       </div>
