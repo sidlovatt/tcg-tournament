@@ -23,7 +23,7 @@ function StandingsPage() {
   const [tournament, setTournament] = useState(null)
   const [players, setPlayers] = useState([])
   const [pairings, setPairings] = useState([])
-  const [showCastHelp, setShowCastHelp] = useState(true)
+  const [showCastHelp, setShowCastHelp] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [view, setView] = useState('standings')
@@ -77,29 +77,29 @@ function StandingsPage() {
           ✕ Exit
         </button>
         {/* TV Header */}
-        <div className="relative flex items-center justify-between mb-6" style={{ minHeight: '112px' }}>
-          {/* Left: tournament info */}
-          <div className="flex-1 pr-4">
-            <h1 className="text-5xl font-bold text-slate-100">{tournament.name}</h1>
-            <p className="text-slate-500 text-xl mt-1">{tournament.game} · {tournament.type.replace('_', ' ')}</p>
-            <div className="text-slate-400 text-xl mt-1">
-              {tournament.status === 'complete'
-                ? 'Final Results'
-                : tournament.current_round === 0
-                ? 'Starting soon...'
-                : `Round ${tournament.current_round}${isSwiss ? ` / ${tournament.total_rounds}` : ''} · ${pendingCount > 0 ? `${pendingCount} pending` : 'All results in'}`}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          {/* Left: tournament info + logo */}
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="hidden md:block shrink-0">
+              <GameLogo game={tournament.game} className="h-16 w-40" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-3xl md:text-5xl font-bold text-slate-100 truncate">{tournament.name}</h1>
+              <p className="text-slate-500 text-base md:text-xl mt-0.5">{tournament.game} · {tournament.type.replace('_', ' ')}</p>
+              <div className="text-slate-400 text-base md:text-xl mt-0.5">
+                {tournament.status === 'complete'
+                  ? 'Final Results'
+                  : tournament.current_round === 0
+                  ? 'Starting soon...'
+                  : `Round ${tournament.current_round}${isSwiss ? ` / ${tournament.total_rounds}` : ''} · ${pendingCount > 0 ? `${pendingCount} pending` : 'All results in'}`}
+              </div>
             </div>
           </div>
 
-          {/* Centre: game logo — absolutely centred */}
-          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-            <GameLogo game={tournament.game} className="h-24 w-64" />
-          </div>
-
           {/* Right: timer + QR */}
-          <div className="flex items-center gap-6 shrink-0 pl-4">
+          <div className="flex items-center gap-4 shrink-0">
             {tournament.current_round > 0 && tournament.status !== 'complete' && (
-              <div className="w-72">
+              <div className="w-48 md:w-72">
                 <Timer
                   timerStartedAt={tournament.timer_started_at}
                   timerPausedAt={tournament.timer_paused_at}
@@ -110,22 +110,27 @@ function StandingsPage() {
                 />
               </div>
             )}
-            <div className="flex gap-6 items-start">
+            <div className="flex gap-3 md:gap-6 items-start">
               {tournament.current_round === 0 && (
                 <div className="flex flex-col items-center gap-1">
-                  <p className="text-sm font-bold text-slate-200 uppercase tracking-wide">Players</p>
-                  <QRCodeDisplay url={`${origin}/room/${code}/play`} code={code.toUpperCase()} hideCode />
+                  <p className="text-xs md:text-sm font-bold text-slate-200 uppercase tracking-wide">Players</p>
+                  <QRCodeDisplay url={`${origin}/room/${code}/play`} code={code.toUpperCase()} hideCode small />
                 </div>
               )}
               <div className="flex flex-col items-center gap-1">
-                <p className="text-sm font-bold text-slate-200 uppercase tracking-wide">Spectators</p>
-                <QRCodeDisplay url={`${origin}/room/${code}/standings`} code={code.toUpperCase()} hideCode />
+                <p className="text-xs md:text-sm font-bold text-slate-200 uppercase tracking-wide">Spectators</p>
+                <QRCodeDisplay url={`${origin}/room/${code}/standings`} code={code.toUpperCase()} hideCode small />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Cast instructions */}
+        {/* Cast instructions toggle */}
+        {!showCastHelp && (
+          <button onClick={() => setShowCastHelp(true)} className="text-slate-600 hover:text-slate-400 text-xs mb-3 transition-colors">
+            ? How to display on a TV
+          </button>
+        )}
         {showCastHelp && (
           <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-4 mb-4 relative">
             <button onClick={() => setShowCastHelp(false)} className="absolute top-3 right-3 text-slate-500 hover:text-slate-300 text-sm">✕ Dismiss</button>

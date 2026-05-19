@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
 import { generateSwissPairings, applyBye, getStandings } from '@/lib/swiss'
 import { generateSingleElimPairings, generateDoubleElimPairings, nextSingleElimRound } from '@/lib/knockout'
+import { getSwissRounds } from '@/lib/gamePresets'
 
 export async function POST(request, { params }) {
   try {
@@ -121,10 +122,16 @@ export async function POST(request, { params }) {
     const { error: insertErr } = await supabase.from('pairings').insert(pairingsToInsert)
     if (insertErr) throw insertErr
 
+    // Recalculate total_rounds on Round 1 start (fixes QR mode where count was 0 at creation)
+    const totalRounds = (tournament.type === 'swiss' && nextRound === 1)
+      ? getSwissRounds(players.length)
+      : tournament.total_rounds
+
     // Update tournament round and status
     await supabase.from('tournaments').update({
       current_round: nextRound,
       status: 'active',
+      total_rounds: totalRounds,
       timer_started_at: null,
       timer_paused_at: null,
     }).eq('id', tournament.id)

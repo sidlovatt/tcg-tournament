@@ -30,7 +30,7 @@ export default function CreateTournament() {
   const [error, setError] = useState('')
 
   const [name, setName] = useState('')
-  const [type, setType] = useState('')
+  const [type, setType] = useState('swiss')
   const [game, setGame] = useState('Custom')
   const [format, setFormat] = useState('bo1')
   const [timerMinutes, setTimerMinutes] = useState(30)

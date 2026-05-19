@@ -1,4 +1,5 @@
 import "./globals.css";
+import FloatingButtons from '@/components/FloatingButtons'
 
 export const metadata = {
   title: "TCG Tournament Manager",
@@ -24,8 +25,9 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="TCG Tournament" />
         <link rel="apple-touch-icon" href="/icons/icon.png" />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-900 text-slate-100">
+      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
         {children}
+        <FloatingButtons />
         <script dangerouslySetInnerHTML={{ __html: `
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');

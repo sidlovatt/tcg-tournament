@@ -33,7 +33,7 @@ export default function Timer({ timerStartedAt, timerPausedAt, timerMinutes, isT
   useEffect(() => {
     if (!isExpiredNow) { setIsFlashing(false); return }
     setIsFlashing(true)
-    const t = setTimeout(() => setIsFlashing(false), 60000)
+    const t = setTimeout(() => setIsFlashing(false), 10000)
     return () => clearTimeout(t)
   }, [isExpiredNow])
 
@@ -73,7 +73,7 @@ export default function Timer({ timerStartedAt, timerPausedAt, timerMinutes, isT
         <p className={`text-red-400 font-semibold mt-1 animate-pulse ${large ? 'text-2xl' : 'text-sm'}`}>TIME · Finish current game</p>
       )}
       {isWarning && !isExpired && (
-        <p className={`text-amber-400 mt-1 ${large ? 'text-xl' : 'text-sm'}`}>5 minutes remaining</p>
+        <p className={`text-amber-400 mt-1 ${large ? 'text-xl' : 'text-sm'}`}>&lt; 5 mins remaining</p>
       )}
       {isTD && (
         <div className="flex gap-2 mt-3 justify-center">
