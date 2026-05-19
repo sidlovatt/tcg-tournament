@@ -9,6 +9,7 @@ export const CHANGELOG = [
       'Player entry uses multi-line textarea (one name per line)',
       'QR sign-up auto-generates room when tab is clicked',
       'Swiss round count recalculates correctly when players join via QR',
+      'TD can set a custom number of Swiss rounds at tournament creation (leave blank for auto)',
       'Cast/TV view fixed on mobile — instructions hidden by default',
       'Timer flash reduced to 10 seconds; warning now shows "< 5 mins remaining"',
     ],
