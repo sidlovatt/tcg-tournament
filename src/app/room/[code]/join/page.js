@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import GameLogo from '@/components/GameLogo'
 
 export default function JoinPage() {
   const { code } = useParams()
@@ -76,7 +77,9 @@ export default function JoinPage() {
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="text-center">
-          <div className="text-4xl mb-3">🃏</div>
+          <div className="flex justify-center mb-3">
+            <GameLogo game={tournament.game} className="h-16 w-40" />
+          </div>
           <h1 className="text-2xl font-bold text-slate-100">{tournament.name}</h1>
           <p className="text-slate-500 text-sm mt-1">{tournament.game} · {tournament.type.replace('_', ' ')}</p>
           <div className="font-mono text-lg text-violet-400 tracking-widest mt-1">{code.toUpperCase()}</div>
