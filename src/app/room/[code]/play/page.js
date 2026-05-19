@@ -132,7 +132,7 @@ export default function PlayerPage() {
   }
 
   return (
-    <main className="flex flex-col h-dvh px-4 pt-5 pb-4 max-w-lg mx-auto overflow-y-auto">
+    <main className="flex flex-col h-dvh px-3 pt-5 pb-4 w-full max-w-2xl mx-auto overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
