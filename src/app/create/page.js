@@ -35,6 +35,7 @@ export default function CreateTournament() {
   const [format, setFormat] = useState('bo1')
   const [timerMinutes, setTimerMinutes] = useState(30)
   const [customTimer, setCustomTimer] = useState(true)
+  const [customRounds, setCustomRounds] = useState('')
   const [playerInput, setPlayerInput] = useState('')
   const [players, setPlayers] = useState([])
 
@@ -129,7 +130,7 @@ export default function CreateTournament() {
       const res = await fetch('/api/tournaments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, type, game, format, timerMinutes, playerNames: [], qrMode: true }),
+        body: JSON.stringify({ name, type, game, format, timerMinutes, playerNames: [], qrMode: true, customRounds: customRounds ? Number(customRounds) : null }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed')
@@ -151,7 +152,7 @@ export default function CreateTournament() {
       const res = await fetch('/api/tournaments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, type, game, format, timerMinutes, playerNames: players }),
+        body: JSON.stringify({ name, type, game, format, timerMinutes, playerNames: players, customRounds: customRounds ? Number(customRounds) : null }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed')
@@ -277,6 +278,20 @@ export default function CreateTournament() {
                 <p className="text-xs text-slate-500 mt-1">Auto-set from game preset. Select Custom to override.</p>
               )}
             </div>
+
+            {type === 'swiss' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Swiss Rounds</label>
+                <input
+                  type="number" min={1} max={20}
+                  placeholder="Auto (based on player count)"
+                  value={customRounds}
+                  onChange={e => setCustomRounds(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                />
+                <p className="text-xs text-slate-500 mt-1">Leave blank to auto-calculate using Bandai tournament formula.</p>
+              </div>
+            )}
 
             <button onClick={() => setStep(3)} disabled={!step2Valid} className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white font-semibold py-3 rounded-xl transition-colors">
               Next

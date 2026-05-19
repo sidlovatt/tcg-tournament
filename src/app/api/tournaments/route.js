@@ -9,7 +9,7 @@ export async function POST(request) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    const { name, type, game, format, timerMinutes, playerNames, qrMode } = body
+    const { name, type, game, format, timerMinutes, playerNames, qrMode, customRounds } = body
 
     if (!name || !type || !game || !format || !timerMinutes) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -32,7 +32,7 @@ export async function POST(request) {
       attempts++
     }
 
-    const totalRounds = type === 'swiss' ? getSwissRounds((playerNames || []).length) : 0
+    const totalRounds = type === 'swiss' ? (customRounds || getSwissRounds((playerNames || []).length)) : 0
 
     const { data: tournament, error: tErr } = await supabase
       .from('tournaments')

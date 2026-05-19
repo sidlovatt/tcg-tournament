@@ -122,8 +122,8 @@ export async function POST(request, { params }) {
     const { error: insertErr } = await supabase.from('pairings').insert(pairingsToInsert)
     if (insertErr) throw insertErr
 
-    // Recalculate total_rounds on Round 1 start (fixes QR mode where count was 0 at creation)
-    const totalRounds = (tournament.type === 'swiss' && nextRound === 1)
+    // Recalculate total_rounds on Round 1 start only if it wasn't set at creation (QR mode creates with 0)
+    const totalRounds = (tournament.type === 'swiss' && nextRound === 1 && tournament.total_rounds === 0)
       ? getSwissRounds(players.length)
       : tournament.total_rounds
 
