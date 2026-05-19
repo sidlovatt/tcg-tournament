@@ -132,9 +132,9 @@ export default function PlayerPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-6 max-w-lg mx-auto">
+    <main className="flex flex-col h-dvh px-4 pt-5 pb-4 max-w-lg mx-auto overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <Link href={`/room/${code}`} className="text-slate-500 hover:text-slate-300 text-sm">← Room</Link>
           <h1 className="text-xl font-bold text-slate-100 mt-1">{tournament.name}</h1>
@@ -161,7 +161,7 @@ export default function PlayerPage() {
       )}
 
       {selectedPlayer && (
-        <div className="space-y-4">
+        <div className="flex flex-col flex-1 gap-4">
           {/* Player identity */}
           <div className="flex items-center justify-between bg-slate-800 rounded-xl px-4 py-3">
             <div>
@@ -188,15 +188,15 @@ export default function PlayerPage() {
 
           {/* Waiting for round */}
           {tournament.current_round === 0 && (
-            <div className="text-center py-8 text-slate-500">
-              <p className="text-2xl mb-2">⏳</p>
-              <p>Waiting for Tournament Director to start Round 1...</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
+              <p className="text-4xl mb-3">⏳</p>
+              <p>Waiting for TD to start Round 1...</p>
             </div>
           )}
 
           {/* Pairing */}
           {tournament.current_round > 0 && myPairing && (
-            <div className="bg-slate-800 rounded-xl p-4 space-y-4">
+            <div className="bg-slate-800 rounded-xl p-4 space-y-4 flex-1 flex flex-col justify-center">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-500 uppercase tracking-wider">
                   Round {tournament.current_round} · Table {myPairing.table_number}
