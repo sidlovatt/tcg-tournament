@@ -12,15 +12,14 @@ export const GAME_PRESETS = [
   { name: 'Custom',               bo1: null, bo3: null, supportsBO3: true },
 ]
 
-// Standard Magic-style Swiss round counts
+// Bandai TCG official Swiss round counts (Dragon Ball Super / One Piece / Gundam)
 export function getSwissRounds(playerCount) {
-  if (playerCount <= 4)  return 3
+  if (playerCount <= 4)  return 2
   if (playerCount <= 8)  return 3
   if (playerCount <= 16) return 4
   if (playerCount <= 32) return 5
   if (playerCount <= 64) return 6
-  if (playerCount <= 128) return 7
-  return 8
+  return 7
 }
 
 export function getGamePreset(name) {
