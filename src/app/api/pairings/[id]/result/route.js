@@ -45,6 +45,8 @@ export async function POST(request, { params }) {
       player1_game_wins: p1GameWins ?? (result === 'player1' ? 1 : 0),
       player2_game_wins: p2GameWins ?? (result === 'player2' ? 1 : 0),
       submitted_by: submittedBy || 'player',
+      pending_result: null,
+      pending_claimed_by: null,
     }).eq('id', id)
 
     // Update player stats

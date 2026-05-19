@@ -15,7 +15,7 @@ export default function Home() {
       setError('Room code must be 6 characters')
       return
     }
-    router.push(`/room/${code}`)
+    router.push(`/room/${code}/join`)
   }
 
   return (

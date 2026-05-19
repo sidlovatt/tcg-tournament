@@ -360,7 +360,22 @@ export default function CreateTournament() {
                         <QRCodeSVG value={`${origin}/room/${qrTournamentCode}/join`} size={200} />
                         <p className="text-center text-slate-800 font-mono font-bold tracking-widest mt-2 text-xl">{qrTournamentCode}</p>
                       </div>
-                      <p className="text-slate-500 text-xs">{origin}/room/{qrTournamentCode}/join</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-slate-500 text-xs">{origin}/room/{qrTournamentCode}/join</p>
+                        <button
+                          onClick={() => {
+                            const url = `${origin}/room/${qrTournamentCode}/join`
+                            if (navigator.share) {
+                              navigator.share({ title: 'Join the tournament', text: `Join with code ${qrTournamentCode}`, url })
+                            } else {
+                              navigator.clipboard.writeText(url)
+                            }
+                          }}
+                          className="shrink-0 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Share
+                        </button>
+                      </div>
                     </div>
 
                     <div className="bg-slate-800 rounded-xl p-4">

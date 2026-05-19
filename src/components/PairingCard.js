@@ -53,6 +53,11 @@ export default function PairingCard({ pairing, player1, player2, isTD, format, o
             {resultLabels[pairing.result]}
           </span>
         )}
+        {isPending && pairing.pending_result && (
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-900/50 text-amber-300">
+            Claim pending
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2 mb-4">
@@ -64,6 +69,26 @@ export default function PairingCard({ pairing, player1, player2, isTD, format, o
           <span className="text-slate-100 font-semibold">{player2?.name}</span>
         </div>
       </div>
+
+      {/* Pending claim from player */}
+      {isPending && pairing.pending_result && (
+        <div className="mb-3 bg-amber-900/20 border border-amber-700/40 rounded-lg px-3 py-2 flex items-center justify-between gap-3">
+          <p className="text-amber-300 text-xs">
+            {pairing.pending_claimed_by === 'player1' ? player1?.name : player2?.name} claims{' '}
+            {pairing.pending_result === 'draw' ? 'Draw' :
+              pairing.pending_result === 'player1' ? `${player1?.name} wins` : `${player2?.name} wins`}
+          </p>
+          {isTD && (
+            <button
+              onClick={() => submitResult(pairing.pending_result)}
+              disabled={submitting}
+              className="shrink-0 bg-amber-700 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
+            >
+              Confirm
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Game score input for BO3 */}
       {isPending && format === 'bo3' && (

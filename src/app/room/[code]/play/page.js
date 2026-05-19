@@ -93,13 +93,10 @@ export default function PlayerPage() {
     setSubmitting(true)
     try {
       const amP1 = pairing.player1_id === selectedPlayer.id
-      const p1GameWins = tournament.format === 'bo3' && p1GW !== '' ? Number(p1GW) : undefined
-      const p2GameWins = tournament.format === 'bo3' && p2GW !== '' ? Number(p2GW) : undefined
-
-      const res = await fetch(`/api/pairings/${pairing.id}/result`, {
+      const res = await fetch(`/api/pairings/${pairing.id}/claim`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ result, p1GameWins, p2GameWins, submittedBy: amP1 ? 'player1' : 'player2' }),
+        body: JSON.stringify({ result, claimedBy: amP1 ? 'player1' : 'player2' }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
@@ -118,6 +115,7 @@ export default function PlayerPage() {
   const opponent = getOpponent(myPairing)
   const isBye = myPairing && !myPairing.player2_id
   const alreadySubmitted = myPairing && myPairing.result !== 'pending'
+  const hasClaim = !!myPairing?.pending_result && myPairing?.result === 'pending'
   const amP1 = myPairing && selectedPlayer && myPairing.player1_id === selectedPlayer.id
 
   const resultWinner = myPairing?.result === 'player1'
@@ -125,6 +123,13 @@ export default function PlayerPage() {
     : myPairing?.result === 'player2'
     ? players.find(p => p.id === myPairing.player2_id)
     : null
+
+  function claimLabel() {
+    if (!myPairing?.pending_result) return ''
+    if (myPairing.pending_result === 'draw') return 'Draw'
+    const winnerIsMe = (amP1 && myPairing.pending_result === 'player1') || (!amP1 && myPairing.pending_result === 'player2')
+    return winnerIsMe ? 'You won' : 'You lost'
+  }
 
   return (
     <main className="min-h-screen px-4 py-6 max-w-lg mx-auto">
@@ -218,8 +223,8 @@ export default function PlayerPage() {
                     </div>
                   </div>
 
-                  {/* Result already submitted */}
-                  {(alreadySubmitted || submitted) && (
+                  {/* TD confirmed result */}
+                  {alreadySubmitted && (
                     <div className="text-center py-2">
                       {myPairing.result === 'draw' ? (
                         <p className="text-slate-300 font-semibold">Result: Draw</p>
@@ -228,12 +233,20 @@ export default function PlayerPage() {
                       ) : (
                         <p className="text-red-400 font-semibold">You lost</p>
                       )}
-                      <p className="text-slate-500 text-xs mt-1">Result recorded</p>
+                      <p className="text-slate-500 text-xs mt-1">Result confirmed</p>
+                    </div>
+                  )}
+
+                  {/* Awaiting TD confirmation */}
+                  {!alreadySubmitted && (hasClaim || submitted) && (
+                    <div className="text-center py-3 bg-amber-900/20 border border-amber-700/40 rounded-xl">
+                      <p className="text-amber-300 font-semibold text-sm">Awaiting TD confirmation</p>
+                      <p className="text-slate-400 text-xs mt-1">You reported: {claimLabel()}</p>
                     </div>
                   )}
 
                   {/* Submit result */}
-                  {!alreadySubmitted && !submitted && (
+                  {!alreadySubmitted && !hasClaim && !submitted && (
                     <div className="space-y-3">
                       {tournament.format === 'bo3' && (
                         <div>
