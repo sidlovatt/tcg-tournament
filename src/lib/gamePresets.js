@@ -8,6 +8,7 @@ export const GAME_PRESETS = [
   { name: 'Dragon Ball Super',    bo1: 40,  bo3: 60,  supportsBO3: true  },
   { name: 'Digimon TCG',          bo1: 30,  bo3: null, supportsBO3: false },
   { name: 'Lorcana',              bo1: 50,  bo3: null, supportsBO3: false },
+  { name: 'Riftbound',            bo1: 30,  bo3: null, supportsBO3: false },
   { name: 'Custom',               bo1: null, bo3: null, supportsBO3: true },
 ]
 

@@ -194,7 +194,7 @@ export default function PlayerPage() {
             <div className="bg-slate-800 rounded-xl p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-500 uppercase tracking-wider">
-                  Round {tournament.current_round} — Table {myPairing.table_number}
+                  Round {tournament.current_round} · Table {myPairing.table_number}
                 </span>
               </div>
 

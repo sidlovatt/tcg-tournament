@@ -50,6 +50,7 @@ export async function POST(request, { params }) {
     }
 
     let newPairings = []
+    let luckyLoser = null
 
     if (tournament.type === 'swiss') {
       newPairings = generateSwissPairings(players, allPairings)
@@ -61,18 +62,17 @@ export async function POST(request, { params }) {
         const currentRoundPairings = allPairings.filter(p => p.round === tournament.current_round)
         const result = nextSingleElimRound(currentRoundPairings, players)
         if (result.done) {
-          // Mark winner and complete tournament
           await supabase.from('tournaments').update({ status: 'complete' }).eq('id', tournament.id)
           return NextResponse.json({ done: true, winner: result.winner })
         }
         newPairings = result.pairings
+        luckyLoser = result.luckyLoser
       }
     } else if (tournament.type === 'double_elim') {
       if (tournament.current_round === 0) {
         const { winnersPairings } = generateDoubleElimPairings(players)
         newPairings = winnersPairings.map(p => ({ ...p, bracket_round: 'winners' }))
       } else {
-        // Simplified: treat like single elim for now with bracket_round tracking
         const currentRoundPairings = allPairings.filter(p => p.round === tournament.current_round)
         const result = nextSingleElimRound(currentRoundPairings, players)
         if (result.done) {
@@ -80,6 +80,7 @@ export async function POST(request, { params }) {
           return NextResponse.json({ done: true, winner: result.winner })
         }
         newPairings = result.pairings
+        luckyLoser = result.luckyLoser
       }
     }
 
@@ -100,6 +101,11 @@ export async function POST(request, { params }) {
       }
     }
     await Promise.all(byeUpdates)
+
+    // Re-activate lucky loser
+    if (luckyLoser) {
+      await supabase.from('players').update({ eliminated: false }).eq('id', luckyLoser.id)
+    }
 
     // Insert pairings
     const pairingsToInsert = newPairings.map(p => ({
@@ -123,7 +129,7 @@ export async function POST(request, { params }) {
       timer_paused_at: null,
     }).eq('id', tournament.id)
 
-    return NextResponse.json({ round: nextRound })
+    return NextResponse.json({ round: nextRound, luckyLoser: luckyLoser ? { id: luckyLoser.id, name: luckyLoser.name } : null })
   } catch (err) {
     console.error('Advance round error:', err)
     return NextResponse.json({ error: 'Failed to advance round' }, { status: 500 })

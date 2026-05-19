@@ -1,75 +1,74 @@
 // Knockout bracket logic — single and double elimination
 
-function nextPowerOf2(n) {
-  let p = 1
-  while (p < n) p *= 2
-  return p
-}
-
-// Standard bracket seed order: 1v(n), 2v(n-1)...
-function seedOrder(size) {
-  if (size === 2) return [1, 2]
-  const half = seedOrder(size / 2)
-  return half.flatMap(s => [s, size + 1 - s])
-}
-
-// Generate round 1 pairings from seeded players list
+// Generate round 1 pairings — straight pairs, no byes for even counts
 export function generateSingleElimPairings(players) {
-  const size = nextPowerOf2(players.length)
-  const seeds = seedOrder(size)
   const pairings = []
-
-  for (let i = 0; i < seeds.length; i += 2) {
-    const p1 = players[seeds[i] - 1] || null
-    const p2 = players[seeds[i + 1] - 1] || null
-
-    // Auto-advance if one slot is empty (bye)
-    if (p1 && !p2) {
-      pairings.push({ player1Id: p1.id, player2Id: null, tableNumber: i / 2 + 1, autoAdvance: true })
-    } else if (!p1 && p2) {
-      pairings.push({ player1Id: p2.id, player2Id: null, tableNumber: i / 2 + 1, autoAdvance: true })
-    } else if (p1 && p2) {
-      pairings.push({ player1Id: p1.id, player2Id: p2.id, tableNumber: i / 2 + 1, autoAdvance: false })
-    }
+  for (let i = 0; i < players.length; i += 2) {
+    const p1 = players[i]
+    const p2 = players[i + 1] || null
+    pairings.push({
+      player1Id: p1.id,
+      player2Id: p2?.id || null,
+      tableNumber: i / 2 + 1,
+      autoAdvance: !p2,
+    })
   }
-
   return pairings
 }
 
-// Advance winners to next round in single elim
+// Advance single elim round.
+// If winners count is odd, randomly revive one loser (lucky loser).
 export function nextSingleElimRound(completedPairings, allPlayers) {
-  const winners = completedPairings.map(p => {
-    if (!p.player2_id) return allPlayers.find(pl => pl.id === p.player1_id) // bye auto-advance
-    if (p.result === 'player1') return allPlayers.find(pl => pl.id === p.player1_id)
-    if (p.result === 'player2') return allPlayers.find(pl => pl.id === p.player2_id)
-    return null
-  }).filter(Boolean)
+  const winners = []
+  const losers = []
 
-  if (winners.length === 1) return { done: true, winner: winners[0], pairings: [] }
+  for (const p of completedPairings) {
+    if (!p.player2_id) {
+      winners.push(allPlayers.find(pl => pl.id === p.player1_id))
+    } else if (p.result === 'player1') {
+      winners.push(allPlayers.find(pl => pl.id === p.player1_id))
+      losers.push(allPlayers.find(pl => pl.id === p.player2_id))
+    } else if (p.result === 'player2') {
+      winners.push(allPlayers.find(pl => pl.id === p.player2_id))
+      losers.push(allPlayers.find(pl => pl.id === p.player1_id))
+    }
+  }
+
+  const advancing = winners.filter(Boolean)
+
+  if (advancing.length === 1) {
+    return { done: true, winner: advancing[0], pairings: [], luckyLoser: null }
+  }
+
+  let participants = [...advancing]
+  let luckyLoser = null
+
+  if (participants.length % 2 !== 0) {
+    const validLosers = losers.filter(Boolean)
+    if (validLosers.length > 0) {
+      luckyLoser = validLosers[Math.floor(Math.random() * validLosers.length)]
+      participants = [...participants, luckyLoser]
+    }
+  }
 
   const pairings = []
-  for (let i = 0; i < winners.length; i += 2) {
+  for (let i = 0; i < participants.length; i += 2) {
     pairings.push({
-      player1Id: winners[i].id,
-      player2Id: winners[i + 1]?.id || null,
+      player1Id: participants[i].id,
+      player2Id: participants[i + 1]?.id || null,
       tableNumber: i / 2 + 1,
-      autoAdvance: !winners[i + 1],
+      autoAdvance: !participants[i + 1],
     })
   }
 
-  return { done: false, winner: null, pairings }
+  return { done: false, winner: null, pairings, luckyLoser }
 }
 
-// Generate round 1 for double elimination
-// Returns { winnersPairings, losersPairings: [] }
+// Double elim — round 1 same as single elim winners bracket
 export function generateDoubleElimPairings(players) {
-  const pairings = generateSingleElimPairings(players)
-  return { winnersPairings: pairings, losersPairings: [] }
+  return { winnersPairings: generateSingleElimPairings(players), losersPairings: [] }
 }
 
-// Advance double elim after a round
-// completedWinners: pairings from winners bracket
-// completedLosers: pairings from losers bracket
 export function nextDoubleElimRound(completedWinners, completedLosers, allPlayers) {
   const getPlayer = id => allPlayers.find(p => p.id === id)
 
@@ -88,8 +87,8 @@ export function nextDoubleElimRound(completedWinners, completedLosers, allPlayer
     }
   }
 
-  const losersElim = []
   const losersAdvance = []
+  const losersElim = []
 
   for (const p of completedLosers) {
     if (!p.player2_id || p.result === 'player1') {
@@ -101,28 +100,21 @@ export function nextDoubleElimRound(completedWinners, completedLosers, allPlayer
   }
 
   const allLosersNext = [...toLosersBracket, ...losersAdvance].filter(Boolean)
+  const winnersFiltered = winnersAdvance.filter(Boolean)
 
   const newWinnersPairings = []
-  for (let i = 0; i < winnersAdvance.filter(Boolean).length; i += 2) {
-    const a = winnersAdvance.filter(Boolean)[i]
-    const b = winnersAdvance.filter(Boolean)[i + 1]
-    if (a && b) newWinnersPairings.push({ player1Id: a.id, player2Id: b.id, tableNumber: i / 2 + 1 })
-    else if (a) newWinnersPairings.push({ player1Id: a.id, player2Id: null, tableNumber: i / 2 + 1 })
+  for (let i = 0; i < winnersFiltered.length; i += 2) {
+    const a = winnersFiltered[i]
+    const b = winnersFiltered[i + 1]
+    newWinnersPairings.push({ player1Id: a.id, player2Id: b?.id || null, tableNumber: i / 2 + 1 })
   }
 
   const newLosersPairings = []
   for (let i = 0; i < allLosersNext.length; i += 2) {
     const a = allLosersNext[i]
     const b = allLosersNext[i + 1]
-    if (a && b) newLosersPairings.push({ player1Id: a.id, player2Id: b.id, tableNumber: i / 2 + 1 })
-    else if (a) newLosersPairings.push({ player1Id: a.id, player2Id: null, tableNumber: i / 2 + 1 })
+    if (a) newLosersPairings.push({ player1Id: a.id, player2Id: b?.id || null, tableNumber: i / 2 + 1 })
   }
 
-  // Grand final: winners bracket winner vs losers bracket winner
-  const grandFinal =
-    newWinnersPairings.length === 0 && newLosersPairings.length === 0
-      ? null
-      : null // set by caller when both brackets produce single player
-
-  return { newWinnersPairings, newLosersPairings, eliminated: losersElim, grandFinal }
+  return { newWinnersPairings, newLosersPairings, eliminated: losersElim }
 }
