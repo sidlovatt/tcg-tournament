@@ -120,7 +120,7 @@ export default function Home() {
           {/* Mockup 2: Cast / TV view */}
           <div className="space-y-2">
             <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Cast to TV</p>
-            <BrowserFrame dark>
+            <BrowserFrame>
               <CastMockup />
             </BrowserFrame>
           </div>
