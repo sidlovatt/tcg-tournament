@@ -69,7 +69,7 @@ function StandingsPage() {
     const standings = getStandings(players, pairings)
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     return (
-      <main className="min-h-screen bg-slate-950 flex flex-col px-8 py-6">
+      <main className="min-h-screen flex flex-col px-8 py-6">
         <button
           onClick={() => { document.exitFullscreen?.(); router.push(`/room/${code}`) }}
           className="fixed top-3 left-3 z-50 bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-slate-100 text-xs px-3 py-1.5 rounded-lg transition-colors"
