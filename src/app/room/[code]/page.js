@@ -22,6 +22,9 @@ export default function RoomPage() {
   const [joinPrompt, setJoinPrompt] = useState(false)
   const [advanceError, setAdvanceError] = useState('')
   const [luckyLoserName, setLuckyLoserName] = useState('')
+  const [addName, setAddName] = useState('')
+  const [addError, setAddError] = useState('')
+  const [addLoading, setAddLoading] = useState(false)
 
   const fetchData = useCallback(async () => {
     const { data: t, error: tErr } = await supabase
@@ -78,6 +81,23 @@ export default function RoomPage() {
     } finally {
       setAdvancing(false)
     }
+  }
+
+  async function handleAddPlayer(e) {
+    e.preventDefault()
+    const name = addName.trim()
+    if (!name) return
+    setAddLoading(true)
+    setAddError('')
+    const res = await fetch(`/api/tournaments/${code}/players`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    })
+    const data = await res.json()
+    if (!res.ok) setAddError(data.error || 'Failed')
+    else setAddName('')
+    setAddLoading(false)
   }
 
   async function handleTimerAction(action) {
@@ -200,6 +220,26 @@ export default function RoomPage() {
                   </div>
                 ))}
               </div>
+              {isTD && (
+                <form onSubmit={handleAddPlayer} className="flex gap-2 mt-4">
+                  <input
+                    type="text"
+                    placeholder="Add player manually..."
+                    value={addName}
+                    onChange={e => { setAddName(e.target.value); setAddError('') }}
+                    maxLength={30}
+                    className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-600 text-sm focus:outline-none focus:border-violet-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={addLoading || !addName.trim()}
+                    className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                  >
+                    {addLoading ? '...' : 'Add'}
+                  </button>
+                </form>
+              )}
+              {addError && <p className="text-red-400 text-xs mt-1">{addError}</p>}
             </div>
           ) : currentRoundPairings.length === 0 ? (
             <p className="text-slate-500 text-center py-8">No pairings</p>
