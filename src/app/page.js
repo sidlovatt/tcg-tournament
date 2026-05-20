@@ -38,14 +38,14 @@ export default function Home() {
       </div>
 
       {/* Main layout: description left, cards right */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-20">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 items-start mb-20">
 
         {/* Left: branding + description */}
-        <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-6 lg:pt-4">
-          <img src="/icons/icon.png" alt="TCG Tournament" className="w-44 h-44 rounded-2xl" />
+        <div className="flex flex-col items-start gap-5">
+          <img src="/icons/icon.png" alt="TCG Tournament" className="w-40 h-40 rounded-2xl" />
           <div>
             <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
-            <p className="text-slate-400 leading-relaxed">
+            <p className="text-slate-400 leading-relaxed text-sm">
               Run competitive TCG tournaments at home, at your local shop, or anywhere in between. Swiss pairings, live standings, knockout brackets — all from a single shareable room code. No software to install, no account required to play.
             </p>
           </div>
