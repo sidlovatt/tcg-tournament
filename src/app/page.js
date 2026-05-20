@@ -42,17 +42,13 @@ export default function Home() {
 
         {/* Left: branding + description */}
         <div className="flex flex-col gap-5 justify-between">
-          <div className="flex flex-col gap-6">
-          <div className="flex items-stretch gap-4">
-            <div className="w-28 shrink-0">
-              <img src="/icons/icon.png" alt="TCG Tournament" className="w-full h-full rounded-2xl object-cover" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
-              <p className="text-slate-400 leading-relaxed text-sm">
-                Run competitive TCG tournaments at home, at your local shop, or anywhere in between. Swiss pairings, live standings, knockout brackets — all from a single shareable room code. No software to install, no account required to play.
-              </p>
-            </div>
+          <div className="flex flex-col gap-5">
+          <img src="/icons/icon.png" alt="TCG Tournament" className="w-32 h-32 rounded-2xl mx-auto" />
+          <div>
+            <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
+            <p className="text-slate-400 leading-relaxed text-sm">
+              Run competitive TCG tournaments at home, at your local shop, or anywhere in between. Swiss pairings, live standings, knockout brackets — all from a single shareable room code. No software to install, no account required to play.
+            </p>
           </div>
           <div className="space-y-3 w-full">
             {[
