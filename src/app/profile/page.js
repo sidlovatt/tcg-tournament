@@ -71,6 +71,11 @@ export default function ProfilePage() {
 
         {/* Actions */}
         <div className="pt-2 border-t border-slate-700 space-y-3">
+          {!username && (
+            <div className="bg-amber-900/30 border border-amber-700/50 rounded-xl px-4 py-3 text-amber-300 text-sm">
+              Set a username to register for events and appear on leaderboards.
+            </div>
+          )}
           <Link href="/profile/setup" className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-2.5 rounded-xl text-center transition-colors text-sm">
             {username ? 'Change username' : 'Set username'}
           </Link>

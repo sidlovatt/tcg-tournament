@@ -29,8 +29,7 @@ function CallbackHandler() {
           .maybeSingle()
 
         if (!profile?.username) {
-          const setupNext = next !== '/' ? `?next=${encodeURIComponent(next)}` : ''
-          router.replace(`/profile/setup${setupNext}`)
+          router.replace('/profile')
         } else {
           router.replace(next)
         }
@@ -47,8 +46,7 @@ function CallbackHandler() {
               .eq('id', existing.user.id)
               .maybeSingle()
             if (!profile?.username) {
-              const setupNext = next !== '/' ? `?next=${encodeURIComponent(next)}` : ''
-              router.replace(`/profile/setup${setupNext}`)
+              router.replace('/profile')
               return
             }
           }

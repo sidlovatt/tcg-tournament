@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 const AuthContext = createContext(null)
 
-const SETUP_EXEMPT = ['/profile/setup', '/signin', '/privacy', '/terms']
+const SETUP_EXEMPT = ['/profile', '/signin', '/privacy', '/terms']
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
         const name = await fetchUsername(u.id)
         setLoading(false)
         if (!name && !SETUP_EXEMPT.some(p => window.location.pathname.startsWith(p))) {
-          router.replace('/profile/setup')
+          router.replace('/profile')
         }
       } else {
         setUsername(null)
@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!loading && usernameLoaded && user && !username) {
       if (!SETUP_EXEMPT.some(p => pathname?.startsWith(p))) {
-        router.replace('/profile/setup')
+        router.replace('/profile')
       }
     }
   }, [loading, usernameLoaded, user, username, pathname])
