@@ -8,25 +8,24 @@ function getServiceClient() {
   )
 }
 
-async function getUser(request) {
-  const authHeader = request.headers.get('Authorization')
-  if (!authHeader) return null
-  const token = authHeader.replace('Bearer ', '')
-  // Validate token with a minimal auth client
-  const authClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  )
-  const { data: { user } } = await authClient.auth.getUser(token)
-  return user || null
+function getUserIdFromToken(request) {
+  try {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader) return null
+    const token = authHeader.replace('Bearer ', '')
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString())
+    return payload.sub || null
+  } catch {
+    return null
+  }
 }
 
 export async function GET(request) {
   try {
-    const user = await getUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userId = getUserIdFromToken(request)
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const db = getServiceClient()
-    const { data } = await db.from('profiles').select('username').eq('id', user.id).maybeSingle()
+    const { data } = await db.from('profiles').select('username').eq('id', userId).maybeSingle()
     return NextResponse.json({ username: data?.username || null })
   } catch {
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })
@@ -35,8 +34,8 @@ export async function GET(request) {
 
 export async function PATCH(request) {
   try {
-    const user = await getUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userId = getUserIdFromToken(request)
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { username } = await request.json()
     if (!username) return NextResponse.json({ error: 'Username required' }, { status: 400 })
@@ -49,7 +48,7 @@ export async function PATCH(request) {
     const db = getServiceClient()
     const { error } = await db
       .from('profiles')
-      .upsert({ id: user.id, username: clean }, { onConflict: 'id' })
+      .upsert({ id: userId, username: clean }, { onConflict: 'id' })
 
     if (error) {
       if (error.code === '23505') return NextResponse.json({ error: 'Username already taken' }, { status: 409 })

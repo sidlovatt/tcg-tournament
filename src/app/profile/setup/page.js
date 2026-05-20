@@ -107,7 +107,13 @@ function SetupForm() {
             disabled={status !== 'available' || submitting}
             className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
           >
-            {submitting ? 'Saving...' : 'Set username'}
+            {submitting ? (
+            <span className="flex items-center justify-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '300ms' }} />
+            </span>
+          ) : 'Set username'}
           </button>
         </form>
       </div>
