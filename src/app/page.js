@@ -67,6 +67,28 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          {/* Screenshots — inside left column */}
+          <div className="space-y-4 pt-2">
+            <div>
+              <h2 className="text-lg font-bold text-slate-100">See it in action</h2>
+              <p className="text-slate-500 text-xs mt-0.5">What you and your players actually see</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Tournament Director</p>
+                <BrowserFrame><TDMockup /></BrowserFrame>
+              </div>
+              <div className="space-y-1 flex flex-col items-center">
+                <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Player&apos;s Phone</p>
+                <PhoneFrame><PlayerMockup /></PhoneFrame>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Cast to TV</p>
+                <BrowserFrame><CastMockup /></BrowserFrame>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right: two cards stacked */}
@@ -142,40 +164,6 @@ export default function Home() {
 
         </div>{/* end right cards column */}
       </div>{/* end main grid */}
-
-      {/* Screenshots */}
-      <div className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-100">See it in action</h2>
-          <p className="text-slate-500 text-sm mt-1">What you and your players actually see</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Mockup 1: TD room view */}
-          <div className="space-y-2">
-            <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Tournament Director</p>
-            <BrowserFrame>
-              <TDMockup />
-            </BrowserFrame>
-          </div>
-
-          {/* Mockup 2: Player phone view (centre) */}
-          <div className="space-y-2 flex flex-col items-center">
-            <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Player&apos;s Phone</p>
-            <PhoneFrame>
-              <PlayerMockup />
-            </PhoneFrame>
-          </div>
-
-          {/* Mockup 3: Cast / TV view */}
-          <div className="space-y-2">
-            <p className="text-xs text-slate-500 uppercase tracking-wider text-center font-semibold">Cast to TV</p>
-            <BrowserFrame>
-              <CastMockup />
-            </BrowserFrame>
-          </div>
-        </div>
-      </div>
 
       <footer className="mt-16 pt-6 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-600">
         <p>© {new Date().getFullYear()} TCG Tournament Manager</p>
