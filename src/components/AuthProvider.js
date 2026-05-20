@@ -16,11 +16,17 @@ export function AuthProvider({ children }) {
   const router = useRouter()
   const pathname = usePathname()
 
-  async function fetchUsername(userId) {
-    const { data } = await supabase.from('profiles').select('username').eq('id', userId).maybeSingle()
-    setUsername(data?.username || null)
-    setUsernameLoaded(true)
-    return data?.username || null
+  async function fetchUsername(token) {
+    try {
+      const res = await fetch('/api/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (!res.ok) return null
+      const { username } = await res.json()
+      return username || null
+    } catch {
+      return null
+    }
   }
 
   useEffect(() => {
@@ -28,16 +34,26 @@ export function AuthProvider({ children }) {
       const u = s?.user ?? null
       setUser(u)
       setSession(s ?? null)
-      if (u) fetchUsername(u.id).then(() => setLoading(false))
-      else { setUsernameLoaded(true); setLoading(false) }
+      if (u && s?.access_token) {
+        fetchUsername(s.access_token).then(name => {
+          setUsername(name)
+          setUsernameLoaded(true)
+          setLoading(false)
+        })
+      } else {
+        setUsernameLoaded(true)
+        setLoading(false)
+      }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null
       setUser(u)
       setSession(session ?? null)
-      if (u) {
-        const name = await fetchUsername(u.id)
+      if (u && session?.access_token) {
+        const name = await fetchUsername(session.access_token)
+        setUsername(name)
+        setUsernameLoaded(true)
         setLoading(false)
         if (!name && !SETUP_EXEMPT.some(p => window.location.pathname.startsWith(p))) {
           router.replace('/profile')
