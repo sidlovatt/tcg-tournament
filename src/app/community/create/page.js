@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
@@ -12,20 +12,15 @@ export default function CreateEventPage() {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [postcodeInput, setPostcodeInput] = useState('')
-  const [postcodeStatus, setPostcodeStatus] = useState(null) // null | 'looking' | 'found' | 'notfound'
+  const [addressQuery, setAddressQuery] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [searching, setSearching] = useState(false)
+  const [locationSet, setLocationSet] = useState(false)
+  const debounceRef = useRef(null)
   const [form, setForm] = useState({
-    title: '',
-    game: '',
-    format: '',
-    description: '',
-    venue_name: '',
-    city: '',
-    postcode: '',
-    event_date: '',
-    event_time: '10:00',
-    max_players: '',
-    is_public: true,
+    title: '', game: '', format: '', description: '',
+    venue_name: '', city: '', postcode: '',
+    event_date: '', event_time: '10:00', max_players: '', is_public: true,
   })
 
   useEffect(() => {
@@ -36,20 +31,35 @@ export default function CreateEventPage() {
     setForm(f => ({ ...f, [field]: value }))
   }
 
-  async function findAddress() {
-    const clean = postcodeInput.replace(/\s+/g, '').toUpperCase()
-    if (!clean) return
-    setPostcodeStatus('looking')
-    try {
-      const res = await fetch(`https://api.postcodes.io/postcodes/${clean}`)
-      if (!res.ok) { setPostcodeStatus('notfound'); return }
-      const { result } = await res.json()
-      const city = result.postal_town || result.admin_district || ''
-      setForm(f => ({ ...f, postcode: postcodeInput.toUpperCase(), city }))
-      setPostcodeStatus('found')
-    } catch {
-      setPostcodeStatus('notfound')
-    }
+  function handleAddressInput(val) {
+    setAddressQuery(val)
+    setLocationSet(false)
+    setSuggestions([])
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (val.length < 3) return
+    setSearching(true)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&countrycodes=gb&format=json&addressdetails=1&limit=6`,
+          { headers: { 'Accept-Language': 'en-GB' } }
+        )
+        const results = await res.json()
+        setSuggestions(results)
+      } catch {}
+      setSearching(false)
+    }, 350)
+  }
+
+  function selectSuggestion(s) {
+    const addr = s.address || {}
+    const city = addr.city || addr.town || addr.village || addr.county || ''
+    const postcode = addr.postcode || ''
+    const venueName = s.name || addr.road || ''
+    setForm(f => ({ ...f, venue_name: venueName, city, postcode }))
+    setAddressQuery(s.display_name)
+    setSuggestions([])
+    setLocationSet(true)
   }
 
   async function handleSubmit(e) {
@@ -58,7 +68,6 @@ export default function CreateEventPage() {
     setSubmitting(true)
     try {
       const eventDate = new Date(`${form.event_date}T${form.event_time}:00`)
-
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: {
@@ -94,8 +103,7 @@ export default function CreateEventPage() {
           <h2 className="font-bold text-slate-200">Event Details</h2>
           <Field label="Event title" required>
             <input type="text" value={form.title} onChange={e => update('title', e.target.value)}
-              placeholder="Friday Night Pokémon" required
-              className={inputCls} />
+              placeholder="Friday Night Pokémon" required className={inputCls} />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Game" required>
@@ -119,34 +127,54 @@ export default function CreateEventPage() {
         {/* Location */}
         <section className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-4">
           <h2 className="font-bold text-slate-200">Location</h2>
-          <Field label="Postcode" required>
-            <div className="flex gap-2">
+          <Field label="Search address" required>
+            <div className="relative">
               <input
                 type="text"
-                value={postcodeInput}
-                onChange={e => { setPostcodeInput(e.target.value.toUpperCase()); setPostcodeStatus(null) }}
-                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), findAddress())}
-                placeholder="SW1A 1AA"
-                className={`${inputCls} font-mono tracking-wider flex-1`}
+                value={addressQuery}
+                onChange={e => handleAddressInput(e.target.value)}
+                placeholder="Start typing a venue or address..."
+                autoComplete="off"
+                className={inputCls}
               />
-              <button type="button" onClick={findAddress} disabled={postcodeStatus === 'looking'}
-                className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors text-sm shrink-0">
-                {postcodeStatus === 'looking' ? '...' : 'Find Address'}
-              </button>
+              {searching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+              {suggestions.length > 0 && (
+                <ul className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-600 rounded-xl overflow-hidden shadow-xl">
+                  {suggestions.map((s, i) => (
+                    <li key={i}>
+                      <button type="button" onClick={() => selectSuggestion(s)}
+                        className="w-full text-left px-4 py-3 text-sm text-slate-200 hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0">
+                        <span className="font-semibold">{s.name || s.display_name.split(',')[0]}</span>
+                        <span className="text-slate-500 text-xs block truncate">{s.display_name}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            {postcodeStatus === 'notfound' && <p className="text-red-400 text-xs mt-1">Postcode not found. Enter city manually below.</p>}
-            {postcodeStatus === 'found' && <p className="text-emerald-400 text-xs mt-1">✓ Address found</p>}
+            {locationSet && <p className="text-emerald-400 text-xs mt-1">✓ Location set — edit fields below if needed</p>}
           </Field>
-          {(postcodeStatus === 'found' || postcodeStatus === 'notfound') && (
+
+          {locationSet && (
             <>
               <Field label="Venue name" required>
                 <input type="text" value={form.venue_name} onChange={e => update('venue_name', e.target.value)}
                   placeholder="The Game Store" required className={inputCls} />
               </Field>
-              <Field label="City" required>
-                <input type="text" value={form.city} onChange={e => update('city', e.target.value)}
-                  placeholder="London" required className={inputCls} />
-              </Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="City" required>
+                  <input type="text" value={form.city} onChange={e => update('city', e.target.value)}
+                    placeholder="London" required className={inputCls} />
+                </Field>
+                <Field label="Postcode" required>
+                  <input type="text" value={form.postcode} onChange={e => update('postcode', e.target.value.toUpperCase())}
+                    placeholder="SW1A 1AA" required className={`${inputCls} font-mono tracking-wider`} />
+                </Field>
+              </div>
             </>
           )}
         </section>
