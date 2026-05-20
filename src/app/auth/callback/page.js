@@ -16,7 +16,7 @@ function CallbackHandler() {
     function finish(hasUser) {
       if (done.current) return
       done.current = true
-      router.replace(hasUser ? '/profile' : '/')
+      router.replace('/')
     }
 
     // Hard fallback — no Supabase dependency
