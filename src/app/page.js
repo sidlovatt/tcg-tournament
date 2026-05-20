@@ -90,7 +90,7 @@ export default function Home() {
         <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-7 flex flex-col gap-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-amber-400 font-bold text-lg">🗓 Create or Find</span>
+              <span className="text-amber-400 font-bold text-lg">🗓 Community Tournaments</span>
               <span className="text-xs bg-amber-900/40 text-amber-500 border border-amber-800/50 px-2 py-0.5 rounded-full">Coming soon</span>
             </div>
             <p className="text-slate-500 text-sm">Plan events in advance, open registration, and find tournaments near you.</p>
