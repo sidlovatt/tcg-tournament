@@ -157,11 +157,18 @@ export default function Home() {
           </div>
           <div className="space-y-3">
             {user ? (
-              <div className="w-full bg-slate-700/40 text-slate-600 font-semibold py-3 px-4 rounded-xl text-center text-sm cursor-not-allowed">Coming soon</div>
-            ) : (
-              <Link href="/signin" className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-6 rounded-xl text-center transition-colors">
-                Sign in for early access
+              <Link href="/community" className="block w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors">
+                Find Events
               </Link>
+            ) : (
+              <>
+                <Link href="/community" className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-6 rounded-xl text-center transition-colors">
+                  Browse Events
+                </Link>
+                <Link href="/signin" className="block w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold py-2.5 px-6 rounded-xl text-center transition-colors text-sm">
+                  Sign in to host
+                </Link>
+              </>
             )}
             <p className="text-slate-600 text-xs text-center">Free account · Google or Discord</p>
           </div>
