@@ -136,12 +136,10 @@ export default function Home() {
         </div>
 
         {/* Create or Find — sign in */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-7 flex flex-col gap-5">
+        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-7 flex flex-col gap-5">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-amber-400 font-bold text-lg">🗓 Community Tournaments</span>
-            </div>
-            <p className="text-slate-500 text-sm">Plan events in advance, open registration, and find tournaments near you.</p>
+            <span className="text-violet-400 font-bold text-lg">🗓 Community Tournaments</span>
+            <p className="text-slate-400 text-sm mt-1">Plan events in advance, open registration, and find tournaments near you.</p>
           </div>
           <div className="space-y-2 flex-1">
             {[
@@ -150,22 +148,22 @@ export default function Home() {
               'Find tournaments near you',
               'Search by game, venue & date',
             ].map(f => (
-              <p key={f} className="text-slate-600 text-sm flex items-center gap-2">
-                <span className="text-slate-700">✓</span> {f}
+              <p key={f} className="text-slate-400 text-sm flex items-center gap-2">
+                <span className="text-violet-500">✓</span> {f}
               </p>
             ))}
           </div>
           <div className="space-y-3">
             {user ? (
-              <Link href="/community" className="block w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors">
-                Find Events
+              <Link href="/community" className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors">
+                Events
               </Link>
             ) : (
               <>
-                <Link href="/community" className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-6 rounded-xl text-center transition-colors">
-                  Browse Events
+                <Link href="/community" className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors">
+                  Events
                 </Link>
-                <Link href="/signin" className="block w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold py-2.5 px-6 rounded-xl text-center transition-colors text-sm">
+                <Link href="/signin" className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-2.5 px-6 rounded-xl text-center transition-colors text-sm">
                   Host
                 </Link>
               </>
