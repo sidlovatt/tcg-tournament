@@ -136,11 +136,10 @@ export default function Home() {
       </div>
 
       <footer className="mt-16 pt-6 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-600">
-        <p>© {new Date().getFullYear()} TCG Tournament Manager · Free &amp; open source</p>
+        <p>© {new Date().getFullYear()} TCG Tournament Manager</p>
         <div className="flex gap-4">
           <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
-          <a href="https://github.com/sidlovatt/tcg-tournament" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">GitHub</a>
         </div>
       </footer>
     </main>

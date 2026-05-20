@@ -46,7 +46,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-slate-100 mb-3">Data retention</h2>
-          <p className="text-slate-400">Tournament data is retained indefinitely at present. There is no automatic deletion. If you would like your data removed, contact us via the <a href="https://github.com/sidlovatt/tcg-tournament/issues" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 underline">GitHub issues page</a>.</p>
+          <p className="text-slate-400">Tournament data is retained indefinitely at present. There is no automatic deletion. If you would like your data removed, use the Feedback button on the site.</p>
         </section>
 
         <section>

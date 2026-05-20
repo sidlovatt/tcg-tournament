@@ -50,7 +50,7 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-slate-100 mb-3">Contact</h2>
-          <p>Questions or concerns can be raised via the <a href="https://github.com/sidlovatt/tcg-tournament/issues" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 underline">GitHub issues page</a> or through the Feedback button on the site.</p>
+          <p>Questions or concerns can be raised via the Feedback button on the site.</p>
         </section>
       </div>
 
