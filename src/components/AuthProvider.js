@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
   const pathname = usePathname()
 
   async function fetchUsername(userId) {
-    const { data } = await supabase.from('profiles').select('username').eq('id', userId).single()
+    const { data } = await supabase.from('profiles').select('username').eq('id', userId).maybeSingle()
     setUsername(data?.username || null)
     setUsernameLoaded(true)
     return data?.username || null
@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null
       setUser(u)
-      if (u) fetchUsername(u.id)
+      if (u) fetchUsername(u.id).then(() => setLoading(false))
       else { setUsernameLoaded(true); setLoading(false) }
     })
 

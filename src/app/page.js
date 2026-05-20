@@ -30,7 +30,7 @@ export default function Home() {
             {user.user_metadata?.avatar_url && (
               <img src={user.user_metadata.avatar_url} alt="" className="w-7 h-7 rounded-full" />
             )}
-            <span className="text-slate-400 text-sm">{username ? `@${username}` : (user.user_metadata?.full_name || user.email)}</span>
+            <Link href="/profile" className="text-slate-400 hover:text-slate-200 text-sm transition-colors">{username ? `@${username}` : (user.user_metadata?.full_name || user.email)}</Link>
             <Link href="/signout" className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Sign out</Link>
           </div>
         ) : (
