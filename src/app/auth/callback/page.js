@@ -4,14 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Suspense } from 'react'
 
-async function resolveAndRedirect(session, next, router) {
-  if (!session?.user) { router.replace('/'); return }
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('id', session.user.id)
-    .maybeSingle()
-  router.replace(profile?.username ? next : '/profile')
+function resolveAndRedirect(session, router) {
+  router.replace(session?.user ? '/profile' : '/')
 }
 
 function CallbackHandler() {
@@ -20,14 +14,13 @@ function CallbackHandler() {
 
   useEffect(() => {
     const code = searchParams.get('code')
-    const next = searchParams.get('next') || '/'
 
     if (!code) { router.replace('/'); return }
 
     const timeout = setTimeout(async () => {
       // Fallback: check if session was established anyway
       const { data: { session } } = await supabase.auth.getSession()
-      resolveAndRedirect(session, next, router)
+      resolveAndRedirect(session, router)
     }, 8000)
 
     supabase.auth.exchangeCodeForSession(code)
@@ -36,17 +29,17 @@ function CallbackHandler() {
         const session = result?.data?.session
         if (session?.user) {
           // Exchange succeeded
-          resolveAndRedirect(session, next, router)
+          resolveAndRedirect(session, router)
         } else {
           // Exchange returned null — code may have been auto-consumed
           const { data: { session: existing } } = await supabase.auth.getSession()
-          resolveAndRedirect(existing, next, router)
+          resolveAndRedirect(existing, router)
         }
       })
       .catch(async () => {
         clearTimeout(timeout)
         const { data: { session } } = await supabase.auth.getSession()
-        resolveAndRedirect(session, next, router)
+        resolveAndRedirect(session, router)
       })
   }, [router, searchParams])
 
