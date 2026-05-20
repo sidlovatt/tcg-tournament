@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
 import { GAME_PRESETS, getSwissRounds } from '@/lib/gamePresets'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/components/AuthProvider'
+
 
 const TOURNAMENT_TYPES = [
   {
@@ -26,7 +26,7 @@ const TOURNAMENT_TYPES = [
 
 export default function CreateTournament() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -51,10 +51,6 @@ export default function CreateTournament() {
   const [qrAddLoading, setQrAddLoading] = useState(false)
 
   useEffect(() => { setOrigin(window.location.origin) }, [])
-
-  useEffect(() => {
-    if (!authLoading && !user) router.replace('/signin?next=/create')
-  }, [authLoading, user, router])
 
   // Live player list when in QR mode
   useEffect(() => {

@@ -38,83 +38,104 @@ export default function Home() {
       </div>
 
       {/* Hero */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
+      <div className="text-center mb-12">
+        <div className="flex justify-center mb-5">
+          <img src="/icons/icon.png" alt="TCG Tournament" className="w-24 h-24 rounded-2xl" />
+        </div>
+        <h1 className="text-4xl font-bold text-slate-100 mb-3">TCG Tournament Manager</h1>
+        <p className="text-slate-400 text-lg max-w-xl mx-auto">
+          Run competitive TCG tournaments with Swiss pairings, live standings, and knockout brackets — from a single shareable room code.
+        </p>
+      </div>
 
-        {/* Left: branding + features */}
-        <div className="space-y-8">
+      {/* Two paths */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20 max-w-3xl mx-auto">
+
+        {/* Quick Tournament */}
+        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-7 flex flex-col gap-5">
           <div>
-            <div className="flex items-center gap-5 mb-3">
-              <img src="/icons/icon.png" alt="TCG Tournament" className="w-48 h-48 rounded-2xl shrink-0" />
-              <div>
-                <h1 className="text-3xl font-bold text-slate-100 leading-tight">TCG Tournament Manager</h1>
-                <p className="text-violet-400 text-lg mt-2 font-medium">Free. No account. No fuss.</p>
-              </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-violet-400 font-bold text-lg">⚡ Quick Tournament</span>
             </div>
+            <p className="text-slate-400 text-sm">Create a room, share the code, start playing. No account needed.</p>
           </div>
 
-          <p className="text-slate-400 text-lg leading-relaxed">
-            Run competitive TCG tournaments at home with your friends. Swiss pairings, live standings, knockout brackets, all from a single shareable room code.
-          </p>
-
-          <div className="space-y-4">
+          <div className="space-y-3 flex-1">
             {[
-              { icon: <SwissIcon />, title: 'Swiss & Knockout', desc: 'Full Swiss with OMW% tiebreakers, single and double elimination brackets' },
-              { icon: <QRIcon />, title: 'Players join by QR', desc: 'Players scan a code and submit results from their own device' },
-              { icon: <CastIcon />, title: 'Cast to any screen', desc: 'Live standings and timer display for a TV or projector' },
-              { icon: <TimerIcon />, title: 'Game-specific timers', desc: 'Preset round timers for Gundam, Magic, Pokémon, One Piece and more' },
+              'Swiss & knockout brackets',
+              'Players join by QR code',
+              'Live standings on any screen',
+              'Game-specific round timers',
             ].map(f => (
-              <div key={f.title} className="flex items-start gap-4">
-                <div className="bg-violet-900/40 border border-violet-800/50 rounded-lg p-2 shrink-0 text-violet-400 mt-0.5">
-                  {f.icon}
-                </div>
-                <div>
-                  <p className="text-slate-200 font-semibold">{f.title}</p>
-                  <p className="text-slate-500 text-sm">{f.desc}</p>
-                </div>
-              </div>
+              <p key={f} className="text-slate-400 text-sm flex items-center gap-2">
+                <span className="text-violet-500">✓</span> {f}
+              </p>
             ))}
+          </div>
+
+          <div className="space-y-3">
+            <Link
+              href="/create"
+              className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors"
+            >
+              Create Tournament
+            </Link>
+            <form onSubmit={handleJoin} className="space-y-2">
+              <input
+                type="text"
+                placeholder="Have a room code? Enter it here"
+                value={roomCode}
+                onChange={e => { setRoomCode(e.target.value.toUpperCase()); setError('') }}
+                maxLength={6}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-center text-lg tracking-widest font-mono text-slate-100 placeholder:text-slate-600 placeholder:text-xs placeholder:tracking-normal focus:outline-none focus:border-violet-500"
+              />
+              {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+              <button type="submit" className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2.5 rounded-xl transition-colors text-sm">
+                Join Tournament
+              </button>
+            </form>
+            <p className="text-slate-600 text-xs text-center">No account needed</p>
           </div>
         </div>
 
-        {/* Right: actions */}
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-8 space-y-6">
+        {/* Organised Tournament */}
+        <div className="bg-slate-800/30 border border-slate-700/60 rounded-2xl p-7 flex flex-col gap-5">
           <div>
-            <h2 className="text-2xl font-bold text-slate-100">Get started</h2>
-            <p className="text-slate-400 text-sm mt-1">Create a tournament or join an existing one</p>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-amber-400 font-bold text-lg">🗓 Plan a Tournament</span>
+              <span className="text-xs bg-amber-900/40 text-amber-500 border border-amber-800/50 px-2 py-0.5 rounded-full">Coming soon</span>
+            </div>
+            <p className="text-slate-400 text-sm">Schedule events in advance, open registration, and let players find you.</p>
           </div>
 
-          <Link
-            href="/create"
-            className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-4 px-6 rounded-xl text-center text-lg transition-colors"
-          >
-            Create Tournament
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-slate-700" />
-            <span className="text-slate-500 text-sm">or join existing</span>
-            <div className="flex-1 h-px bg-slate-700" />
+          <div className="space-y-3 flex-1">
+            {[
+              'Public & private events',
+              'Player registration & applications',
+              'Find tournaments near you',
+              'Shop & venue listings',
+            ].map(f => (
+              <p key={f} className="text-slate-500 text-sm flex items-center gap-2">
+                <span className="text-slate-600">✓</span> {f}
+              </p>
+            ))}
           </div>
 
-          <form onSubmit={handleJoin} className="space-y-3">
-            <input
-              type="text"
-              placeholder="Enter room code (e.g. AB3F7K)"
-              value={roomCode}
-              onChange={e => { setRoomCode(e.target.value.toUpperCase()); setError('') }}
-              maxLength={6}
-              className="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-center text-xl tracking-widest font-mono text-slate-100 placeholder:text-slate-600 placeholder:text-sm placeholder:tracking-normal focus:outline-none focus:border-violet-500"
-            />
-            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-            <button
-              type="submit"
-              className="w-full bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold py-3 px-6 rounded-xl transition-colors"
-            >
-              Join Tournament
-            </button>
-          </form>
-
-          <p className="text-slate-600 text-xs text-center">No account needed · rooms expire after 24 hours</p>
+          <div className="space-y-3">
+            {user ? (
+              <div className="w-full bg-slate-700/50 text-slate-500 font-semibold py-3 px-6 rounded-xl text-center text-sm cursor-not-allowed">
+                Coming soon
+              </div>
+            ) : (
+              <Link
+                href="/signin"
+                className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-3 px-6 rounded-xl text-center transition-colors"
+              >
+                Sign in to get early access
+              </Link>
+            )}
+            <p className="text-slate-600 text-xs text-center">Free account · Google or Discord</p>
+          </div>
         </div>
       </div>
 
