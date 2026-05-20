@@ -4,15 +4,16 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
 import { GAME_PRESETS } from '@/lib/gamePresets'
-import { supabase } from '@/lib/supabase'
 
 const GAMES = GAME_PRESETS.filter(g => g.name !== 'Custom').map(g => g.name)
 
 export default function CreateEventPage() {
-  const { user, loading } = useAuth()
+  const { user, session, loading } = useAuth()
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [postcodeInput, setPostcodeInput] = useState('')
+  const [postcodeStatus, setPostcodeStatus] = useState(null) // null | 'looking' | 'found' | 'notfound'
   const [form, setForm] = useState({
     title: '',
     game: '',
@@ -35,19 +36,34 @@ export default function CreateEventPage() {
     setForm(f => ({ ...f, [field]: value }))
   }
 
+  async function findAddress() {
+    const clean = postcodeInput.replace(/\s+/g, '').toUpperCase()
+    if (!clean) return
+    setPostcodeStatus('looking')
+    try {
+      const res = await fetch(`https://api.postcodes.io/postcodes/${clean}`)
+      if (!res.ok) { setPostcodeStatus('notfound'); return }
+      const { result } = await res.json()
+      const city = result.postal_town || result.admin_district || ''
+      setForm(f => ({ ...f, postcode: postcodeInput.toUpperCase(), city }))
+      setPostcodeStatus('found')
+    } catch {
+      setPostcodeStatus('notfound')
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setSubmitting(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
       const eventDate = new Date(`${form.event_date}T${form.event_time}:00`)
 
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
+          'Authorization': `Bearer ${session?.access_token ?? ''}`,
         },
         body: JSON.stringify({
           ...form,
@@ -103,20 +119,36 @@ export default function CreateEventPage() {
         {/* Location */}
         <section className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-4">
           <h2 className="font-bold text-slate-200">Location</h2>
-          <Field label="Venue name" required>
-            <input type="text" value={form.venue_name} onChange={e => update('venue_name', e.target.value)}
-              placeholder="The Game Store" required className={inputCls} />
+          <Field label="Postcode" required>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={postcodeInput}
+                onChange={e => { setPostcodeInput(e.target.value.toUpperCase()); setPostcodeStatus(null) }}
+                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), findAddress())}
+                placeholder="SW1A 1AA"
+                className={`${inputCls} font-mono tracking-wider flex-1`}
+              />
+              <button type="button" onClick={findAddress} disabled={postcodeStatus === 'looking'}
+                className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors text-sm shrink-0">
+                {postcodeStatus === 'looking' ? '...' : 'Find Address'}
+              </button>
+            </div>
+            {postcodeStatus === 'notfound' && <p className="text-red-400 text-xs mt-1">Postcode not found. Enter city manually below.</p>}
+            {postcodeStatus === 'found' && <p className="text-emerald-400 text-xs mt-1">✓ Address found</p>}
           </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="City" required>
-              <input type="text" value={form.city} onChange={e => update('city', e.target.value)}
-                placeholder="London" required className={inputCls} />
-            </Field>
-            <Field label="Postcode" required>
-              <input type="text" value={form.postcode} onChange={e => update('postcode', e.target.value.toUpperCase())}
-                placeholder="SW1A 1AA" required className={`${inputCls} font-mono tracking-wider`} />
-            </Field>
-          </div>
+          {(postcodeStatus === 'found' || postcodeStatus === 'notfound') && (
+            <>
+              <Field label="Venue name" required>
+                <input type="text" value={form.venue_name} onChange={e => update('venue_name', e.target.value)}
+                  placeholder="The Game Store" required className={inputCls} />
+              </Field>
+              <Field label="City" required>
+                <input type="text" value={form.city} onChange={e => update('city', e.target.value)}
+                  placeholder="London" required className={inputCls} />
+              </Field>
+            </>
+          )}
         </section>
 
         {/* Date & time */}
