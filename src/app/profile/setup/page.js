@@ -46,15 +46,18 @@ function SetupForm() {
     setSubmitting(true)
     setError('')
     try {
-      const clean = username.toLowerCase().trim()
-      const { error: upsertError } = await supabase
-        .from('profiles')
-        .upsert({ id: user.id, username: clean }, { onConflict: 'id' })
-      if (upsertError) {
-        setError(upsertError.code === '23505' ? 'Username already taken' : upsertError.message)
-        return
-      }
-      if (setCtxUsername) setCtxUsername(clean)
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ username }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Failed to set username'); return }
+      if (setCtxUsername) setCtxUsername(data.username)
       router.replace(next)
     } catch (e) {
       setError(e?.message || 'Failed to set username')

@@ -1,28 +1,31 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-function getAuthenticatedClient(token) {
+function getServiceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    { global: { headers: { Authorization: `Bearer ${token}` } } }
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   )
 }
 
-async function getUserAndClient(request) {
+async function getUser(request) {
   const authHeader = request.headers.get('Authorization')
-  if (!authHeader) return {}
+  if (!authHeader) return null
   const token = authHeader.replace('Bearer ', '')
-  const db = getAuthenticatedClient(token)
-  const { data: { user } } = await db.auth.getUser(token)
-  return { user: user || null, db }
+  // Validate token with a minimal auth client
+  const authClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
+  const { data: { user } } = await authClient.auth.getUser(token)
+  return user || null
 }
 
 export async function GET(request) {
   try {
-    const { user, db } = await getUserAndClient(request)
+    const user = await getUser(request)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+    const db = getServiceClient()
     const { data } = await db.from('profiles').select('username').eq('id', user.id).maybeSingle()
     return NextResponse.json({ username: data?.username || null })
   } catch {
@@ -32,7 +35,7 @@ export async function GET(request) {
 
 export async function PATCH(request) {
   try {
-    const { user, db } = await getUserAndClient(request)
+    const user = await getUser(request)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { username } = await request.json()
@@ -43,6 +46,7 @@ export async function PATCH(request) {
       return NextResponse.json({ error: 'Username must be 3–20 characters: letters, numbers, underscores only' }, { status: 400 })
     }
 
+    const db = getServiceClient()
     const { error } = await db
       .from('profiles')
       .upsert({ id: user.id, username: clean }, { onConflict: 'id' })
