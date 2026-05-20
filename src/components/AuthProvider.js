@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    await supabase.auth.signOut()
+    try { await supabase.auth.signOut() } catch {}
     setUser(null)
     setUsername(null)
     setUsernameLoaded(false)
