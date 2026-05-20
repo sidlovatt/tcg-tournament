@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 
 export default function EventPage() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, username } = useAuth()
   const router = useRouter()
   const [event, setEvent] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -39,7 +39,7 @@ export default function EventPage() {
       const res = await fetch(`/api/events/${id}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ display_name: user.user_metadata?.full_name }),
+        body: JSON.stringify({ display_name: username || user.user_metadata?.full_name }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to register'); return }

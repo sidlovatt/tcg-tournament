@@ -13,8 +13,20 @@ function CallbackHandler() {
     const next = searchParams.get('next') || '/'
 
     if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(() => {
-        router.replace(next)
+      supabase.auth.exchangeCodeForSession(code).then(async ({ data: { session } }) => {
+        if (!session?.user) { router.replace('/'); return }
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single()
+
+        if (!profile?.username) {
+          const setupNext = next !== '/' ? `?next=${encodeURIComponent(next)}` : ''
+          router.replace(`/profile/setup${setupNext}`)
+        } else {
+          router.replace(next)
+        }
       }).catch(() => {
         router.replace('/?auth_error=1')
       })

@@ -6,7 +6,7 @@ import { useAuth } from '@/components/AuthProvider'
 
 export default function Home() {
   const router = useRouter()
-  const { user, signOut } = useAuth()
+  const { user, username, signOut } = useAuth()
   const [roomCode, setRoomCode] = useState('')
   const [error, setError] = useState('')
 
@@ -29,7 +29,7 @@ export default function Home() {
             {user.user_metadata?.avatar_url && (
               <img src={user.user_metadata.avatar_url} alt="" className="w-7 h-7 rounded-full" />
             )}
-            <span className="text-slate-400 text-sm">{user.user_metadata?.full_name || user.email}</span>
+            <span className="text-slate-400 text-sm">{username ? `@${username}` : (user.user_metadata?.full_name || user.email)}</span>
             <button onClick={signOut} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Sign out</button>
           </div>
         ) : (
