@@ -1,48 +1,21 @@
 'use client'
 import { useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
-import { Suspense } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/AuthProvider'
 
-function resolveAndRedirect(session, router) {
-  router.replace(session?.user ? '/profile' : '/')
-}
-
-function CallbackHandler() {
+export default function AuthCallback() {
+  const { user, loading } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   useEffect(() => {
-    const code = searchParams.get('code')
+    const timeout = setTimeout(() => { window.location.href = '/' }, 15000)
+    return () => clearTimeout(timeout)
+  }, [])
 
-    if (!code) { router.replace('/'); return }
-
-    // Hard redirect fallback — no Supabase calls, can't hang
-    const timeout = setTimeout(() => window.location.href = '/', 10000)
-
-    async function tryGetExisting() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        resolveAndRedirect(session, router)
-      } catch {
-        window.location.href = '/'
-      } finally {
-        clearTimeout(timeout)
-      }
-    }
-
-    supabase.auth.exchangeCodeForSession(code)
-      .then(async (result) => {
-        clearTimeout(timeout)
-        const session = result?.data?.session
-        if (session?.user) {
-          resolveAndRedirect(session, router)
-        } else {
-          await tryGetExisting()
-        }
-      })
-      .catch(tryGetExisting)
-  }, [router, searchParams])
+  useEffect(() => {
+    if (loading) return
+    router.replace(user ? '/profile' : '/')
+  }, [loading, user])
 
   return (
     <main className="min-h-screen flex items-center justify-center">
@@ -58,13 +31,5 @@ function CallbackHandler() {
         </div>
       </div>
     </main>
-  )
-}
-
-export default function AuthCallback() {
-  return (
-    <Suspense fallback={<main className="min-h-screen flex items-center justify-center"><p className="text-slate-400">Loading...</p></main>}>
-      <CallbackHandler />
-    </Suspense>
   )
 }
