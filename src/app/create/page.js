@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
 import { GAME_PRESETS, getSwissRounds } from '@/lib/gamePresets'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/components/AuthProvider'
 
 const TOURNAMENT_TYPES = [
   {
@@ -25,6 +26,7 @@ const TOURNAMENT_TYPES = [
 
 export default function CreateTournament() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -49,6 +51,10 @@ export default function CreateTournament() {
   const [qrAddLoading, setQrAddLoading] = useState(false)
 
   useEffect(() => { setOrigin(window.location.origin) }, [])
+
+  useEffect(() => {
+    if (!authLoading && !user) router.replace('/signin?next=/create')
+  }, [authLoading, user, router])
 
   // Live player list when in QR mode
   useEffect(() => {
@@ -127,9 +133,13 @@ export default function CreateTournament() {
     setLoading(true)
     setError('')
     try {
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/tournaments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ name, type, game, format, timerMinutes, playerNames: [], qrMode: true, customRounds: customRounds ? Number(customRounds) : null }),
       })
       const data = await res.json()
@@ -149,9 +159,13 @@ export default function CreateTournament() {
     setLoading(true)
     setError('')
     try {
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/tournaments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ name, type, game, format, timerMinutes, playerNames: players, customRounds: customRounds ? Number(customRounds) : null }),
       })
       const data = await res.json()

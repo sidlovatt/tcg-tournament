@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/components/AuthProvider'
 import Timer from '@/components/Timer'
 import PairingCard from '@/components/PairingCard'
 import Standings from '@/components/Standings'
@@ -11,6 +12,7 @@ import QRCodeDisplay from '@/components/QRCodeDisplay'
 
 export default function RoomPage() {
   const { code } = useParams()
+  const { user } = useAuth()
 
   const [tournament, setTournament] = useState(null)
   const [players, setPlayers] = useState([])
@@ -48,10 +50,17 @@ export default function RoomPage() {
 
   useEffect(() => {
     fetchData()
+  }, [fetchData])
+
+  // TD check: auth user_id match (new) or localStorage (legacy)
+  useEffect(() => {
+    if (!tournament) return
     const tdRooms = JSON.parse(localStorage.getItem('tcg_td_rooms') || '[]')
-    if (tdRooms.includes(code.toUpperCase())) setIsTD(true)
+    const localTD = tdRooms.includes(code.toUpperCase())
+    const authTD = user && tournament.user_id && user.id === tournament.user_id
+    if (localTD || authTD) setIsTD(true)
     else setJoinPrompt(true)
-  }, [code, fetchData])
+  }, [tournament, user, code])
 
   useEffect(() => {
     if (!tournament) return

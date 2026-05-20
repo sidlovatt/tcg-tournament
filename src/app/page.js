@@ -2,9 +2,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useAuth } from '@/components/AuthProvider'
 
 export default function Home() {
   const router = useRouter()
+  const { user, signOut } = useAuth()
   const [roomCode, setRoomCode] = useState('')
   const [error, setError] = useState('')
 
@@ -20,6 +22,21 @@ export default function Home() {
 
   return (
     <main className="px-6 py-12 max-w-6xl mx-auto">
+      {/* Auth bar */}
+      <div className="flex justify-end mb-8">
+        {user ? (
+          <div className="flex items-center gap-3">
+            {user.user_metadata?.avatar_url && (
+              <img src={user.user_metadata.avatar_url} alt="" className="w-7 h-7 rounded-full" />
+            )}
+            <span className="text-slate-400 text-sm">{user.user_metadata?.full_name || user.email}</span>
+            <button onClick={signOut} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Sign out</button>
+          </div>
+        ) : (
+          <Link href="/signin" className="text-slate-400 hover:text-slate-100 text-sm transition-colors">Sign in</Link>
+        )}
+      </div>
+
       {/* Hero */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
 

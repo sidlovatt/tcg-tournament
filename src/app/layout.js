@@ -1,5 +1,6 @@
 import "./globals.css";
 import FloatingButtons from '@/components/FloatingButtons'
+import { AuthProvider } from '@/components/AuthProvider'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tcg-tournament.vercel.app'
 
@@ -63,13 +64,15 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {children}
-        <FloatingButtons />
-        <script dangerouslySetInnerHTML={{ __html: `
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
-          }
-        `}} />
+        <AuthProvider>
+          {children}
+          <FloatingButtons />
+          <script dangerouslySetInnerHTML={{ __html: `
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('/sw.js');
+            }
+          `}} />
+        </AuthProvider>
       </body>
     </html>
   );

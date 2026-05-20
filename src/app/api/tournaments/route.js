@@ -11,6 +11,15 @@ export async function POST(request) {
     const body = await request.json()
     const { name, type, game, format, timerMinutes, playerNames, qrMode, customRounds } = body
 
+    // Get user from auth token if provided
+    let userId = null
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '')
+      const { data: { user } } = await supabase.auth.getUser(token)
+      userId = user?.id ?? null
+    }
+
     if (!name || !type || !game || !format || !timerMinutes) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
@@ -36,7 +45,7 @@ export async function POST(request) {
 
     const { data: tournament, error: tErr } = await supabase
       .from('tournaments')
-      .insert({ code, name, type, game, format, timer_minutes: timerMinutes, total_rounds: totalRounds })
+      .insert({ code, name, type, game, format, timer_minutes: timerMinutes, total_rounds: totalRounds, user_id: userId })
       .select()
       .single()
 
