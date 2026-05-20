@@ -48,107 +48,74 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Three paths */}
-      <div className="max-w-5xl mx-auto mb-20 space-y-6">
+      {/* Two paths */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20 max-w-3xl mx-auto">
 
-        {/* Quick Tournament — primary */}
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-7">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <div className="space-y-4">
-              <div>
-                <span className="text-violet-400 font-bold text-lg">⚡ Quick Tournament</span>
-                <p className="text-slate-400 text-sm mt-1">Create a room, share the code, start playing. No account needed.</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  'Swiss & knockout brackets',
-                  'Players join by QR code',
-                  'Live standings on any screen',
-                  'Game-specific round timers',
-                ].map(f => (
-                  <p key={f} className="text-slate-400 text-sm flex items-start gap-1.5">
-                    <span className="text-violet-500 mt-0.5 shrink-0">✓</span> {f}
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-3">
-              <Link
-                href="/create"
-                className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors"
-              >
-                Create Tournament
-              </Link>
-              <form onSubmit={handleJoin} className="space-y-2">
-                <input
-                  type="text"
-                  placeholder="Have a room code? Enter it here"
-                  value={roomCode}
-                  onChange={e => { setRoomCode(e.target.value.toUpperCase()); setError('') }}
-                  maxLength={6}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-center text-lg tracking-widest font-mono text-slate-100 placeholder:text-slate-600 placeholder:text-xs placeholder:tracking-normal focus:outline-none focus:border-violet-500"
-                />
-                {error && <p className="text-red-400 text-xs text-center">{error}</p>}
-                <button type="submit" className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2.5 rounded-xl transition-colors text-sm">
-                  Join by Room Code
-                </button>
-              </form>
-              <p className="text-slate-600 text-xs text-center">No account needed</p>
-            </div>
+        {/* Quick Tournament */}
+        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-7 flex flex-col gap-5">
+          <div>
+            <span className="text-violet-400 font-bold text-lg">⚡ Quick Tournament</span>
+            <p className="text-slate-400 text-sm mt-1">Create a room, share the code, start playing. No account needed.</p>
+          </div>
+          <div className="space-y-2 flex-1">
+            {['Swiss & knockout brackets', 'Players join by QR code', 'Live standings on any screen', 'Game-specific round timers'].map(f => (
+              <p key={f} className="text-slate-400 text-sm flex items-center gap-2">
+                <span className="text-violet-500">✓</span> {f}
+              </p>
+            ))}
+          </div>
+          <div className="space-y-3">
+            <Link href="/create" className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors">
+              Create Tournament
+            </Link>
+            <form onSubmit={handleJoin} className="space-y-2">
+              <input
+                type="text"
+                placeholder="Have a room code? Enter it here"
+                value={roomCode}
+                onChange={e => { setRoomCode(e.target.value.toUpperCase()); setError('') }}
+                maxLength={6}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-center text-lg tracking-widest font-mono text-slate-100 placeholder:text-slate-600 placeholder:text-xs placeholder:tracking-normal focus:outline-none focus:border-violet-500"
+              />
+              {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+              <button type="submit" className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2.5 rounded-xl transition-colors text-sm">
+                Join by Room Code
+              </button>
+            </form>
+            <p className="text-slate-600 text-xs text-center">No account needed</p>
           </div>
         </div>
 
-        {/* Plan + Find — coming soon side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Plan a Tournament */}
-          <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 flex flex-col gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-amber-400 font-bold">🗓 Plan a Tournament</span>
-                <span className="text-xs bg-amber-900/40 text-amber-500 border border-amber-800/50 px-2 py-0.5 rounded-full">Coming soon</span>
-              </div>
-              <p className="text-slate-500 text-sm">Schedule events in advance and open registration to your community.</p>
+        {/* Create or Find — sign in */}
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-7 flex flex-col gap-5">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-amber-400 font-bold text-lg">🗓 Create or Find</span>
+              <span className="text-xs bg-amber-900/40 text-amber-500 border border-amber-800/50 px-2 py-0.5 rounded-full">Coming soon</span>
             </div>
-            <div className="space-y-2 flex-1">
-              {['Public & private events', 'Player registration & applications', 'Shop & venue profile', 'Date, time & format listing'].map(f => (
-                <p key={f} className="text-slate-600 text-sm flex items-center gap-2">
-                  <span className="text-slate-700">✓</span> {f}
-                </p>
-              ))}
-            </div>
-            {user ? (
-              <div className="w-full bg-slate-700/40 text-slate-600 font-semibold py-2.5 px-4 rounded-xl text-center text-sm cursor-not-allowed">Coming soon</div>
-            ) : (
-              <Link href="/signin" className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-2.5 px-4 rounded-xl text-center transition-colors text-sm">
-                Sign in for early access
-              </Link>
-            )}
+            <p className="text-slate-500 text-sm">Plan events in advance, open registration, and find tournaments near you.</p>
           </div>
-
-          {/* Find a Tournament */}
-          <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 flex flex-col gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-emerald-400 font-bold">🔍 Find a Tournament</span>
-                <span className="text-xs bg-emerald-900/40 text-emerald-500 border border-emerald-800/50 px-2 py-0.5 rounded-full">Coming soon</span>
-              </div>
-              <p className="text-slate-500 text-sm">Discover local events at shops, pubs, and community venues near you.</p>
-            </div>
-            <div className="space-y-2 flex-1">
-              {['Search by game & location', 'Browse upcoming events', 'Apply & register online', 'Get notified when spots open'].map(f => (
-                <p key={f} className="text-slate-600 text-sm flex items-center gap-2">
-                  <span className="text-slate-700">✓</span> {f}
-                </p>
-              ))}
-            </div>
+          <div className="space-y-2 flex-1">
+            {[
+              'Schedule & list public events',
+              'Player registration & applications',
+              'Find tournaments near you',
+              'Search by game, venue & date',
+            ].map(f => (
+              <p key={f} className="text-slate-600 text-sm flex items-center gap-2">
+                <span className="text-slate-700">✓</span> {f}
+              </p>
+            ))}
+          </div>
+          <div className="space-y-3">
             {user ? (
-              <div className="w-full bg-slate-700/40 text-slate-600 font-semibold py-2.5 px-4 rounded-xl text-center text-sm cursor-not-allowed">Coming soon</div>
+              <div className="w-full bg-slate-700/40 text-slate-600 font-semibold py-3 px-4 rounded-xl text-center text-sm cursor-not-allowed">Coming soon</div>
             ) : (
-              <Link href="/signin" className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-2.5 px-4 rounded-xl text-center transition-colors text-sm">
+              <Link href="/signin" className="block w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-6 rounded-xl text-center transition-colors">
                 Sign in for early access
               </Link>
             )}
+            <p className="text-slate-600 text-xs text-center">Free account · Google or Discord</p>
           </div>
         </div>
       </div>
