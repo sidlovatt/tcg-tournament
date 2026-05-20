@@ -21,9 +21,9 @@ export default function Home() {
   }
 
   return (
-    <main className="px-6 py-12 max-w-6xl mx-auto">
+    <main className="px-6 pt-6 pb-12 max-w-6xl mx-auto">
       {/* Auth bar */}
-      <div className="flex justify-end mb-8">
+      <div className="flex justify-end mb-4">
         {user ? (
           <div className="flex items-center gap-3">
             {user.user_metadata?.avatar_url && (
@@ -37,19 +37,40 @@ export default function Home() {
         )}
       </div>
 
-      {/* Hero */}
-      <div className="text-center mb-12">
-        <div className="flex justify-center mb-3">
-          <img src="/icons/icon.png" alt="TCG Tournament" className="w-44 h-44 rounded-2xl" />
-        </div>
-        <h1 className="text-2xl font-bold text-slate-100 mb-3">TCG Tournament Manager</h1>
-        <p className="text-slate-400 text-lg max-w-xl mx-auto">
-          Run competitive TCG tournaments with Swiss pairings, live standings, and knockout brackets — from a single shareable room code.
-        </p>
-      </div>
+      {/* Main layout: description left, cards right */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-20">
 
-      {/* Two paths */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20 max-w-3xl mx-auto">
+        {/* Left: branding + description */}
+        <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-6 lg:pt-4">
+          <img src="/icons/icon.png" alt="TCG Tournament" className="w-44 h-44 rounded-2xl" />
+          <div>
+            <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
+            <p className="text-slate-400 leading-relaxed">
+              Run competitive TCG tournaments at home, at your local shop, or anywhere in between. Swiss pairings, live standings, knockout brackets — all from a single shareable room code. No software to install, no account required to play.
+            </p>
+          </div>
+          <div className="space-y-3 w-full">
+            {[
+              { icon: <SwissIcon />, title: 'Swiss & Knockout', desc: 'Full Swiss with OMW% tiebreakers, single and double elimination' },
+              { icon: <QRIcon />, title: 'Players join by QR', desc: 'Scan a code, submit results from your own phone' },
+              { icon: <CastIcon />, title: 'Cast to any screen', desc: 'Live standings and timer on a TV or projector' },
+              { icon: <TimerIcon />, title: 'Game-specific timers', desc: 'Presets for Gundam, Magic, Pokémon, One Piece and more' },
+            ].map(f => (
+              <div key={f.title} className="flex items-start gap-3">
+                <div className="bg-violet-900/40 border border-violet-800/50 rounded-lg p-1.5 shrink-0 text-violet-400 mt-0.5">
+                  {f.icon}
+                </div>
+                <div>
+                  <p className="text-slate-200 font-semibold text-sm">{f.title}</p>
+                  <p className="text-slate-500 text-xs">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: two cards stacked */}
+        <div className="flex flex-col gap-6">
 
         {/* Quick Tournament */}
         <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-7 flex flex-col gap-5">
@@ -118,7 +139,9 @@ export default function Home() {
             <p className="text-slate-600 text-xs text-center">Free account · Google or Discord</p>
           </div>
         </div>
-      </div>
+
+        </div>{/* end right cards column */}
+      </div>{/* end main grid */}
 
       {/* Screenshots */}
       <div className="space-y-6">
