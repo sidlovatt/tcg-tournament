@@ -35,9 +35,24 @@ function CallbackHandler() {
           router.replace(next)
         }
       })
-      .catch(() => {
+      .catch(async () => {
         clearTimeout(timeout)
-        // Code may already be consumed — let onAuthStateChange in AuthProvider handle it
+        // Code may already be consumed by detectSessionInUrl — check for existing session
+        try {
+          const { data: { session: existing } } = await supabase.auth.getSession()
+          if (existing?.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', existing.user.id)
+              .maybeSingle()
+            if (!profile?.username) {
+              const setupNext = next !== '/' ? `?next=${encodeURIComponent(next)}` : ''
+              router.replace(`/profile/setup${setupNext}`)
+              return
+            }
+          }
+        } catch {}
         router.replace(next)
       })
   }, [router, searchParams])

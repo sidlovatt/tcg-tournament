@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 const AuthContext = createContext(null)
 
-const SETUP_EXEMPT = ['/profile/setup', '/auth/callback', '/signin', '/privacy', '/terms']
+const SETUP_EXEMPT = ['/profile/setup', '/signin', '/privacy', '/terms']
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
