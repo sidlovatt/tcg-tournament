@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
@@ -9,16 +9,16 @@ export default function ProfilePage() {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
 
-  if (loading) return (
+  useEffect(() => {
+    if (!loading && !user) router.replace('/signin')
+  }, [loading, user])
+
+  // Show skeleton until we know if user exists
+  if (!user) return (
     <main className="min-h-screen flex items-center justify-center">
-      <p className="text-slate-500">Loading...</p>
+      <p className="text-slate-500 text-sm">Loading...</p>
     </main>
   )
-
-  if (!user) {
-    router.replace('/signin')
-    return null
-  }
 
   const displayName = user.user_metadata?.full_name || user.email
   const avatar = user.user_metadata?.avatar_url
