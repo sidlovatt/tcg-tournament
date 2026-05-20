@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
 import { GAME_PRESETS } from '@/lib/gamePresets'
@@ -9,22 +9,78 @@ const RADII = [5, 10, 25, 50]
 
 export default function CommunityPage() {
   const { user } = useAuth()
-  const [postcode, setPostcode] = useState('')
+  const [locationQuery, setLocationQuery] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [searching, setSearching] = useState(false)
+  const [coords, setCoords] = useState(null) // { lat, lng } from geolocation or autocomplete
+  const [geoLoading, setGeoLoading] = useState(false)
   const [radius, setRadius] = useState(10)
   const [game, setGame] = useState('')
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [searched, setSearched] = useState(false)
   const [error, setError] = useState('')
+  const debounceRef = useRef(null)
+
+  function handleLocationInput(val) {
+    setLocationQuery(val)
+    setCoords(null)
+    setSuggestions([])
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (val.length < 3) return
+    setSearching(true)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=5`,
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        const results = await res.json()
+        setSuggestions(results)
+      } catch {}
+      setSearching(false)
+    }, 350)
+  }
+
+  function selectSuggestion(s) {
+    setLocationQuery(s.display_name)
+    setCoords({ lat: parseFloat(s.lat), lng: parseFloat(s.lon) })
+    setSuggestions([])
+  }
+
+  function useMyLocation() {
+    if (!navigator.geolocation) { setError('Geolocation not supported by your browser'); return }
+    setGeoLoading(true)
+    setError('')
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setLocationQuery('My location')
+        setSuggestions([])
+        setGeoLoading(false)
+      },
+      () => {
+        setError('Could not get your location')
+        setGeoLoading(false)
+      },
+      { timeout: 10000 }
+    )
+  }
 
   async function search(e) {
     e?.preventDefault()
     setError('')
     setLoading(true)
     setSearched(true)
+    setSuggestions([])
     try {
       const params = new URLSearchParams()
-      if (postcode) params.set('postcode', postcode)
+      if (coords) {
+        params.set('lat', coords.lat)
+        params.set('lng', coords.lng)
+      } else if (locationQuery.trim()) {
+        params.set('location', locationQuery.trim())
+      }
       params.set('radius', radius)
       if (game) params.set('game', game)
       const res = await fetch(`/api/events?${params}`)
@@ -61,16 +117,54 @@ export default function CommunityPage() {
 
       {/* Search bar */}
       <form onSubmit={search} className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 mb-8 flex flex-wrap gap-3 items-end">
-        <div className="flex-1 min-w-[160px]">
-          <label className="text-xs text-slate-500 uppercase tracking-wider font-semibold block mb-1.5">Your postcode</label>
-          <input
-            type="text"
-            value={postcode}
-            onChange={e => setPostcode(e.target.value.toUpperCase())}
-            placeholder="e.g. SW1A 1AA"
-            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-violet-500 font-mono tracking-wider"
-          />
+        <div className="flex-1 min-w-[200px]">
+          <label className="text-xs text-slate-500 uppercase tracking-wider font-semibold block mb-1.5">Location</label>
+          <div className="relative">
+            <input
+              type="text"
+              value={locationQuery}
+              onChange={e => handleLocationInput(e.target.value)}
+              placeholder="City, venue, or postcode..."
+              autoComplete="off"
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-violet-500"
+            />
+            {searching && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+            {suggestions.length > 0 && (
+              <ul className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-600 rounded-xl overflow-hidden shadow-xl">
+                {suggestions.map((s, i) => (
+                  <li key={i}>
+                    <button type="button" onClick={() => selectSuggestion(s)}
+                      className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0">
+                      <span className="font-semibold">{s.name || s.display_name.split(',')[0]}</span>
+                      <span className="text-slate-500 text-xs block truncate">{s.display_name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={useMyLocation}
+          disabled={geoLoading}
+          title="Use my location"
+          className="bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm flex items-center gap-2 shrink-0"
+        >
+          {geoLoading ? (
+            <div className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" /><path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+              <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />
+            </svg>
+          )}
+          <span className="hidden sm:inline">My location</span>
+        </button>
         <div>
           <label className="text-xs text-slate-500 uppercase tracking-wider font-semibold block mb-1.5">Radius</label>
           <select
@@ -104,7 +198,7 @@ export default function CommunityPage() {
       ) : events.length === 0 ? (
         <div className="text-center text-slate-500 py-20">
           <p className="text-lg font-semibold text-slate-400">No events found</p>
-          <p className="text-sm mt-1">{postcode ? 'Try a wider radius or different game' : 'Enter your postcode to find events near you'}</p>
+          <p className="text-sm mt-1">{locationQuery ? 'Try a wider radius or different game' : 'Enter a location or use My Location to find events near you'}</p>
           {user && (
             <Link href="/community/create" className="inline-block mt-6 bg-violet-600 hover:bg-violet-500 text-white font-bold py-2.5 px-6 rounded-xl transition-colors text-sm">
               Host the first one
