@@ -15,7 +15,9 @@ export default function CreateEventPage() {
   const [addressQuery, setAddressQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [searching, setSearching] = useState(false)
+  const [searched, setSearched] = useState(false) // true after first search completes
   const [locationSet, setLocationSet] = useState(false)
+  const [manualEntry, setManualEntry] = useState(false)
   const debounceRef = useRef(null)
   const [form, setForm] = useState({
     title: '', game: '', format: '', description: '',
@@ -34,20 +36,23 @@ export default function CreateEventPage() {
   function handleAddressInput(val) {
     setAddressQuery(val)
     setLocationSet(false)
+    setManualEntry(false)
     setSuggestions([])
+    setSearched(false)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (val.length < 3) return
     setSearching(true)
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=6`,
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=8`,
           { headers: { 'Accept-Language': 'en' } }
         )
         const results = await res.json()
         setSuggestions(results)
       } catch {}
       setSearching(false)
+      setSearched(true)
     }, 350)
   }
 
@@ -60,6 +65,15 @@ export default function CreateEventPage() {
     setAddressQuery(s.display_name)
     setSuggestions([])
     setLocationSet(true)
+    setSearched(false)
+  }
+
+  function enterManually() {
+    setSuggestions([])
+    setSearched(false)
+    setManualEntry(true)
+    setLocationSet(true)
+    setForm(f => ({ ...f, venue_name: '', city: '', postcode: '', lat: '', lng: '' }))
   }
 
   async function handleSubmit(e) {
@@ -67,6 +81,21 @@ export default function CreateEventPage() {
     setError('')
     setSubmitting(true)
     try {
+      let lat = form.lat
+      let lng = form.lng
+
+      // fallback: geocode the city if user entered manually with no coords
+      if ((!lat || !lng) && form.city) {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.city)}&format=json&limit=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          )
+          const results = await res.json()
+          if (results[0]) { lat = results[0].lat; lng = results[0].lon }
+        } catch {}
+      }
+
       const eventDate = new Date(`${form.event_date}T${form.event_time}:00`)
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -76,6 +105,7 @@ export default function CreateEventPage() {
         },
         body: JSON.stringify({
           ...form,
+          lat, lng,
           event_date: eventDate.toISOString(),
           max_players: form.max_players ? parseInt(form.max_players) : null,
         }),
@@ -91,6 +121,8 @@ export default function CreateEventPage() {
   }
 
   if (loading || !user) return null
+
+  const showNoResults = searched && !searching && suggestions.length === 0 && addressQuery.length >= 3 && !locationSet
 
   return (
     <main className="px-6 py-8 max-w-2xl mx-auto">
@@ -133,7 +165,7 @@ export default function CreateEventPage() {
                 type="text"
                 value={addressQuery}
                 onChange={e => handleAddressInput(e.target.value)}
-                placeholder="Start typing a venue or address..."
+                placeholder="e.g. Geek Retreat Harrogate, or just a postcode..."
                 autoComplete="off"
                 className={inputCls}
               />
@@ -153,10 +185,26 @@ export default function CreateEventPage() {
                       </button>
                     </li>
                   ))}
+                  <li>
+                    <button type="button" onClick={enterManually}
+                      className="w-full text-left px-4 py-3 text-sm text-slate-500 hover:bg-slate-700 hover:text-slate-300 transition-colors">
+                      Not listed? Enter manually →
+                    </button>
+                  </li>
                 </ul>
               )}
+              {showNoResults && (
+                <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-600 rounded-xl shadow-xl">
+                  <p className="px-4 py-3 text-sm text-slate-500">No results — try adding the town name (e.g. "Geek Retreat Harrogate")</p>
+                  <button type="button" onClick={enterManually}
+                    className="w-full text-left px-4 py-3 text-sm text-violet-400 hover:bg-slate-700 transition-colors border-t border-slate-700">
+                    Enter location manually →
+                  </button>
+                </div>
+              )}
             </div>
-            {locationSet && <p className="text-emerald-400 text-xs mt-1">✓ Location set — edit fields below if needed</p>}
+            {locationSet && !manualEntry && <p className="text-emerald-400 text-xs mt-1">✓ Location set — edit fields below if needed</p>}
+            {manualEntry && <p className="text-amber-400 text-xs mt-1">Entering manually — we'll geocode the city for distance search</p>}
           </Field>
 
           {locationSet && (
@@ -168,7 +216,7 @@ export default function CreateEventPage() {
               <div className="grid grid-cols-2 gap-4">
                 <Field label="City" required>
                   <input type="text" value={form.city} onChange={e => update('city', e.target.value)}
-                    placeholder="London" required className={inputCls} />
+                    placeholder="Harrogate" required className={inputCls} />
                 </Field>
                 <Field label="Postcode / ZIP">
                   <input type="text" value={form.postcode} onChange={e => update('postcode', e.target.value.toUpperCase())}

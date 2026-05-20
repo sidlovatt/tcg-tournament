@@ -12,6 +12,7 @@ export default function CommunityPage() {
   const [locationQuery, setLocationQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [searching, setSearching] = useState(false)
+  const [locationSearched, setLocationSearched] = useState(false)
   const [coords, setCoords] = useState(null) // { lat, lng } from geolocation or autocomplete
   const [geoLoading, setGeoLoading] = useState(false)
   const [radius, setRadius] = useState(10)
@@ -26,19 +27,21 @@ export default function CommunityPage() {
     setLocationQuery(val)
     setCoords(null)
     setSuggestions([])
+    setLocationSearched(false)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (val.length < 3) return
     setSearching(true)
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=5`,
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=8`,
           { headers: { 'Accept-Language': 'en' } }
         )
         const results = await res.json()
         setSuggestions(results)
       } catch {}
       setSearching(false)
+      setLocationSearched(true)
     }, 350)
   }
 
@@ -46,6 +49,7 @@ export default function CommunityPage() {
     setLocationQuery(s.display_name)
     setCoords({ lat: parseFloat(s.lat), lng: parseFloat(s.lon) })
     setSuggestions([])
+    setLocationSearched(false)
   }
 
   function useMyLocation() {
@@ -57,6 +61,7 @@ export default function CommunityPage() {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         setLocationQuery('My location')
         setSuggestions([])
+        setLocationSearched(false)
         setGeoLoading(false)
       },
       () => {
@@ -145,6 +150,11 @@ export default function CommunityPage() {
                   </li>
                 ))}
               </ul>
+            )}
+            {locationSearched && !searching && suggestions.length === 0 && locationQuery.length >= 3 && (
+              <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-600 rounded-xl shadow-xl px-4 py-3">
+                <p className="text-sm text-slate-500">No results — try adding the town name (e.g. "Geek Retreat Harrogate"), or just search and we'll do our best</p>
+              </div>
             )}
           </div>
         </div>
