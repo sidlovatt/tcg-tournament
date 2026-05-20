@@ -31,7 +31,7 @@ export default function Home() {
               <img src={user.user_metadata.avatar_url} alt="" className="w-7 h-7 rounded-full" />
             )}
             <span className="text-slate-400 text-sm">{username ? `@${username}` : (user.user_metadata?.full_name || user.email)}</span>
-            <button onClick={async () => { try { await supabase.auth.signOut() } catch {} window.location.href = '/' }} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Sign out</button>
+            <Link href="/signout" className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Sign out</Link>
           </div>
         ) : (
           <Link href="/signin" className="text-sm font-semibold text-slate-200 bg-slate-700 hover:bg-slate-600 border border-slate-600 px-4 py-1.5 rounded-lg transition-colors">Sign in</Link>

@@ -1,4 +1,4 @@
-const CACHE = 'tcg-tournament-v1';
+const CACHE = 'tcg-tournament-v2';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

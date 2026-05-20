@@ -67,11 +67,7 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    try { await supabase.auth.signOut() } catch {}
-    setUser(null)
-    setUsername(null)
-    setUsernameLoaded(false)
-    window.location.href = '/'
+    window.location.href = '/signout'
   }
 
   return (
