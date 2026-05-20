@@ -17,30 +17,31 @@ function CallbackHandler() {
 
     if (!code) { router.replace('/'); return }
 
-    const timeout = setTimeout(async () => {
-      // Fallback: check if session was established anyway
-      const { data: { session } } = await supabase.auth.getSession()
-      resolveAndRedirect(session, router)
-    }, 8000)
+    // Hard redirect fallback — no Supabase calls, can't hang
+    const timeout = setTimeout(() => window.location.href = '/', 10000)
+
+    async function tryGetExisting() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        resolveAndRedirect(session, router)
+      } catch {
+        window.location.href = '/'
+      } finally {
+        clearTimeout(timeout)
+      }
+    }
 
     supabase.auth.exchangeCodeForSession(code)
       .then(async (result) => {
         clearTimeout(timeout)
         const session = result?.data?.session
         if (session?.user) {
-          // Exchange succeeded
           resolveAndRedirect(session, router)
         } else {
-          // Exchange returned null — code may have been auto-consumed
-          const { data: { session: existing } } = await supabase.auth.getSession()
-          resolveAndRedirect(existing, router)
+          await tryGetExisting()
         }
       })
-      .catch(async () => {
-        clearTimeout(timeout)
-        const { data: { session } } = await supabase.auth.getSession()
-        resolveAndRedirect(session, router)
-      })
+      .catch(tryGetExisting)
   }, [router, searchParams])
 
   return (
