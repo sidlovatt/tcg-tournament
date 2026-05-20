@@ -38,12 +38,13 @@ export default function Home() {
       </div>
 
       {/* Main layout: description left, cards right */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 items-start mb-20">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 mb-20">
 
         {/* Left: branding + description */}
-        <div className="flex flex-col items-start gap-5">
-          <div className="flex items-center gap-4">
-            <img src="/icons/icon.png" alt="TCG Tournament" className="w-24 h-24 rounded-2xl shrink-0" />
+        <div className="flex flex-col gap-5 justify-between">
+          <div className="flex flex-col gap-5">
+          <div className="flex items-stretch gap-4">
+            <img src="/icons/icon.png" alt="TCG Tournament" className="w-24 rounded-2xl shrink-0 object-cover" />
             <div>
               <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
               <p className="text-slate-400 leading-relaxed text-sm">
@@ -70,8 +71,10 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Screenshots — inside left column */}
-          <div className="space-y-4 pt-2">
+          </div>{/* end top group */}
+
+          {/* Screenshots — pushed to bottom by justify-between */}
+          <div className="space-y-4">
             <div className="text-center">
               <h2 className="text-lg font-bold text-slate-100">See it in action</h2>
               <p className="text-slate-500 text-xs mt-0.5">What you and your players actually see</p>
