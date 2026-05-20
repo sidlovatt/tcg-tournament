@@ -33,7 +33,7 @@ export default function Home() {
             <button onClick={signOut} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Sign out</button>
           </div>
         ) : (
-          <Link href="/signin" className="text-slate-400 hover:text-slate-100 text-sm transition-colors">Sign in</Link>
+          <Link href="/signin" className="text-sm font-semibold text-slate-200 bg-slate-700 hover:bg-slate-600 border border-slate-600 px-4 py-1.5 rounded-lg transition-colors">Sign in</Link>
         )}
       </div>
 
@@ -165,7 +165,7 @@ export default function Home() {
                   Browse Events
                 </Link>
                 <Link href="/signin" className="block w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold py-2.5 px-6 rounded-xl text-center transition-colors text-sm">
-                  Sign in to host
+                  Host
                 </Link>
               </>
             )}
