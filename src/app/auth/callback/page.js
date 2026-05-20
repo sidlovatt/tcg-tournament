@@ -12,14 +12,21 @@ function CallbackHandler() {
     const code = searchParams.get('code')
     const next = searchParams.get('next') || '/'
 
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(async ({ data: { session } }) => {
+    if (!code) { router.replace('/'); return }
+
+    const timeout = setTimeout(() => router.replace('/'), 8000)
+
+    supabase.auth.exchangeCodeForSession(code)
+      .then(async (result) => {
+        clearTimeout(timeout)
+        const session = result?.data?.session
         if (!session?.user) { router.replace('/'); return }
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', session.user.id)
-          .single()
+          .maybeSingle()
 
         if (!profile?.username) {
           const setupNext = next !== '/' ? `?next=${encodeURIComponent(next)}` : ''
@@ -27,12 +34,12 @@ function CallbackHandler() {
         } else {
           router.replace(next)
         }
-      }).catch(() => {
-        router.replace('/?auth_error=1')
       })
-    } else {
-      router.replace('/')
-    }
+      .catch(() => {
+        clearTimeout(timeout)
+        // Code may already be consumed — let onAuthStateChange in AuthProvider handle it
+        router.replace(next)
+      })
   }, [router, searchParams])
 
   return (
