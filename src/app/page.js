@@ -39,8 +39,8 @@ export default function Home() {
 
       {/* Hero */}
       <div className="text-center mb-12">
-        <div className="flex justify-center mb-5">
-          <img src="/icons/icon.png" alt="TCG Tournament" className="w-36 h-36 rounded-2xl" />
+        <div className="flex justify-center mb-3">
+          <img src="/icons/icon.png" alt="TCG Tournament" className="w-44 h-44 rounded-2xl" />
         </div>
         <h1 className="text-2xl font-bold text-slate-100 mb-3">TCG Tournament Manager</h1>
         <p className="text-slate-400 text-lg max-w-xl mx-auto">
