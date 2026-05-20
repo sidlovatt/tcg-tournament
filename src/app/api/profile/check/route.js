@@ -8,7 +8,7 @@ export async function GET(request) {
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
   const { data } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle()
   return NextResponse.json({ available: !data })

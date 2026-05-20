@@ -30,8 +30,13 @@ function SetupForm() {
     if (!/^[a-z0-9_]{3,20}$/.test(val)) { setStatus('invalid'); return }
     setStatus('checking')
     debounceRef.current = setTimeout(async () => {
-      const { data } = await supabase.from('profiles').select('id').eq('username', val).maybeSingle()
-      setStatus(data ? 'taken' : 'available')
+      try {
+        const res = await fetch(`/api/profile/check?username=${encodeURIComponent(val)}`)
+        const { available } = await res.json()
+        setStatus(available ? 'available' : 'taken')
+      } catch {
+        setStatus(null)
+      }
     }, 400)
   }
 
