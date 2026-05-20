@@ -3,10 +3,9 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { useAuth } from '@/components/AuthProvider'
-import { supabase } from '@/lib/supabase'
 
 function SetupForm() {
-  const { user, loading, setUsername: setCtxUsername } = useAuth()
+  const { user, session, loading, setUsername: setCtxUsername } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/'
@@ -46,7 +45,6 @@ function SetupForm() {
     setSubmitting(true)
     setError('')
     try {
-      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: {

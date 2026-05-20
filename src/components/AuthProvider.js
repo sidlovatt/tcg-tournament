@@ -9,6 +9,7 @@ const SETUP_EXEMPT = ['/profile', '/signin', '/privacy', '/terms']
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [session, setSession] = useState(null)
   const [username, setUsername] = useState(null)
   const [usernameLoaded, setUsernameLoaded] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -23,9 +24,10 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const u = session?.user ?? null
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      const u = s?.user ?? null
       setUser(u)
+      setSession(s ?? null)
       if (u) fetchUsername(u.id).then(() => setLoading(false))
       else { setUsernameLoaded(true); setLoading(false) }
     })
@@ -33,6 +35,7 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null
       setUser(u)
+      setSession(session ?? null)
       if (u) {
         const name = await fetchUsername(u.id)
         setLoading(false)
@@ -71,7 +74,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, username, loading, signIn, signOut, setUsername }}>
+    <AuthContext.Provider value={{ user, session, username, loading, signIn, signOut, setUsername }}>
       {children}
     </AuthContext.Provider>
   )
