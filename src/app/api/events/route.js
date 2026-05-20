@@ -72,6 +72,13 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    const eventDateObj = new Date(event_date)
+    const maxDate = new Date()
+    maxDate.setMonth(maxDate.getMonth() + 3)
+    if (eventDateObj > maxDate) {
+      return NextResponse.json({ error: 'Events can only be created up to 3 months in advance' }, { status: 400 })
+    }
+
     const coords = await geocodePostcode(postcode)
     if (!coords) return NextResponse.json({ error: 'Invalid postcode — must be a valid UK postcode' }, { status: 400 })
 

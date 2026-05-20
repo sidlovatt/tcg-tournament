@@ -157,7 +157,10 @@ export default function CreateEventPage() {
           <div className="grid grid-cols-2 gap-4">
             <Field label="Date" required>
               <input type="date" value={form.event_date} onChange={e => update('event_date', e.target.value)}
-                required min={new Date().toISOString().split('T')[0]} className={inputCls} />
+                required
+                min={new Date().toISOString().split('T')[0]}
+                max={(() => { const d = new Date(); d.setMonth(d.getMonth() + 3); return d.toISOString().split('T')[0] })()}
+                className={inputCls} />
             </Field>
             <Field label="Start time" required>
               <input type="time" value={form.event_time} onChange={e => update('event_time', e.target.value)}
