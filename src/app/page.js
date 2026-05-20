@@ -42,12 +42,14 @@ export default function Home() {
 
         {/* Left: branding + description */}
         <div className="flex flex-col items-start gap-5">
-          <img src="/icons/icon.png" alt="TCG Tournament" className="w-40 h-40 rounded-2xl" />
-          <div>
-            <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
-            <p className="text-slate-400 leading-relaxed text-sm">
-              Run competitive TCG tournaments at home, at your local shop, or anywhere in between. Swiss pairings, live standings, knockout brackets — all from a single shareable room code. No software to install, no account required to play.
-            </p>
+          <div className="flex items-center gap-4">
+            <img src="/icons/icon.png" alt="TCG Tournament" className="w-24 h-24 rounded-2xl shrink-0" />
+            <div>
+              <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
+              <p className="text-slate-400 leading-relaxed text-sm">
+                Run competitive TCG tournaments at home, at your local shop, or anywhere in between. Swiss pairings, live standings, knockout brackets — all from a single shareable room code. No software to install, no account required to play.
+              </p>
+            </div>
           </div>
           <div className="space-y-3 w-full">
             {[
@@ -70,7 +72,7 @@ export default function Home() {
 
           {/* Screenshots — inside left column */}
           <div className="space-y-4 pt-2">
-            <div>
+            <div className="text-center">
               <h2 className="text-lg font-bold text-slate-100">See it in action</h2>
               <p className="text-slate-500 text-xs mt-0.5">What you and your players actually see</p>
             </div>
