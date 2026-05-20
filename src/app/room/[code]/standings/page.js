@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -27,6 +27,28 @@ function StandingsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [view, setView] = useState('standings')
+  const [exporting, setExporting] = useState(false)
+  const exportRef = useRef(null)
+
+  async function handleExport() {
+    if (!exportRef.current || exporting) return
+    setExporting(true)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(exportRef.current, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      })
+      const link = document.createElement('a')
+      link.download = `${tournament?.name || 'standings'}-standings.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const fetchData = useCallback(async () => {
     const { data: t } = await supabase.from('tournaments').select('*').eq('code', code.toUpperCase()).single()
@@ -157,7 +179,7 @@ function StandingsPage() {
         )}
 
         {/* Large standings table */}
-        <div className="flex-1">
+        <div className="flex-1" ref={exportRef}>
           <table className="w-full">
             <thead>
               <tr className="text-left border-b-2 border-slate-700">
@@ -197,7 +219,16 @@ function StandingsPage() {
           </table>
         </div>
 
-        <p className="text-slate-700 text-sm text-center mt-4">Updates live · scan {code.toUpperCase()} to join</p>
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-slate-700 text-sm">Updates live · scan {code.toUpperCase()} to join</p>
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="text-slate-600 hover:text-slate-400 text-xs transition-colors disabled:opacity-50"
+          >
+            {exporting ? 'Exporting...' : '↓ Save image'}
+          </button>
+        </div>
       </main>
     )
   }
@@ -261,10 +292,21 @@ function StandingsPage() {
       )}
 
       {view === 'standings' && (
-        <div className="bg-slate-800 rounded-xl p-4">
+        <div className="bg-slate-800 rounded-xl p-4" ref={exportRef}>
           {players.length === 0
             ? <p className="text-slate-500 text-center py-4">No players yet</p>
             : <Standings players={players} pairings={pairings} showTiebreakers={isSwiss} />}
+          {players.length > 0 && (
+            <div className="mt-3 flex justify-end">
+              <button
+                onClick={handleExport}
+                disabled={exporting}
+                className="text-slate-500 hover:text-slate-300 text-xs transition-colors disabled:opacity-50"
+              >
+                {exporting ? 'Exporting...' : '↓ Save as image'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

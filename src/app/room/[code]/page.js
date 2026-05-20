@@ -108,6 +108,14 @@ export default function RoomPage() {
     })
   }
 
+  async function handleDropPlayer(playerId, drop) {
+    await fetch(`/api/players/${playerId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eliminated: drop }),
+    })
+  }
+
   async function handleSubmitResult(pairingId, result, p1GameWins, p2GameWins) {
     const res = await fetch(`/api/pairings/${pairingId}/result`, {
       method: 'POST',
@@ -214,9 +222,18 @@ export default function RoomPage() {
               <p className="text-slate-400 font-medium mb-3">{players.length} Players Registered</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
                 {players.map((p, i) => (
-                  <div key={p.id} className="bg-slate-800 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <div key={p.id} className={`rounded-lg px-3 py-2 flex items-center gap-2 ${p.eliminated ? 'bg-slate-800/40 opacity-50' : 'bg-slate-800'}`}>
                     <span className="text-slate-600 text-xs w-5">{i + 1}</span>
-                    <span className="text-slate-200 text-sm font-medium truncate">{p.name}</span>
+                    <span className="text-slate-200 text-sm font-medium truncate flex-1">{p.name}</span>
+                    {isTD && (
+                      <button
+                        onClick={() => handleDropPlayer(p.id, !p.eliminated)}
+                        className={`text-xs px-1.5 py-0.5 rounded transition-colors shrink-0 ${p.eliminated ? 'text-emerald-400 hover:text-emerald-300' : 'text-slate-600 hover:text-red-400'}`}
+                        title={p.eliminated ? 'Reinstate' : 'Drop'}
+                      >
+                        {p.eliminated ? '↩' : '×'}
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -311,6 +328,25 @@ export default function RoomPage() {
                 <CastIcon />
                 TV View
               </a>
+            </div>
+          )}
+
+          {isTD && !isComplete && tournament.current_round > 0 && (
+            <div className="bg-slate-800 rounded-xl p-4">
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Players</h2>
+              <div className="space-y-1">
+                {players.map(p => (
+                  <div key={p.id} className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg ${p.eliminated ? 'opacity-50' : ''}`}>
+                    <span className={`text-sm font-medium ${p.eliminated ? 'text-slate-500 line-through' : 'text-slate-200'}`}>{p.name}</span>
+                    <button
+                      onClick={() => handleDropPlayer(p.id, !p.eliminated)}
+                      className={`text-xs px-2 py-0.5 rounded border transition-colors shrink-0 ${p.eliminated ? 'border-emerald-700 text-emerald-400 hover:bg-emerald-900/30' : 'border-slate-700 text-slate-500 hover:border-red-700 hover:text-red-400'}`}
+                    >
+                      {p.eliminated ? 'Reinstate' : 'Drop'}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
