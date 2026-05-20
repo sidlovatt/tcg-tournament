@@ -59,7 +59,11 @@ function SetupForm() {
     }
   }
 
-  if (loading || !user) return null
+  if (!user) return (
+    <main className="min-h-screen flex items-center justify-center">
+      <p className="text-slate-400 text-sm">Loading...</p>
+    </main>
+  )
 
   const statusColor = { available: 'text-emerald-400', taken: 'text-red-400', invalid: 'text-amber-400', checking: 'text-slate-500' }
   const statusMsg = { available: '✓ Available', taken: '✗ Already taken', invalid: '3–20 characters: letters, numbers, underscores', checking: 'Checking...' }
