@@ -135,7 +135,7 @@ export default function Home() {
         </div>
 
         {/* Create or Find — sign in */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-7 flex flex-col gap-5">
+        <div className="flex-1 bg-slate-800/30 border border-slate-700/50 rounded-2xl p-7 flex flex-col gap-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-amber-400 font-bold text-lg">🗓 Community Tournaments</span>
