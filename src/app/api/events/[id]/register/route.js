@@ -1,31 +1,31 @@
 import { NextResponse } from 'next/server'
-import { getSupabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
-async function getUser(request) {
-  const supabase = getSupabase()
-  const authHeader = request.headers.get('Authorization')
-  if (!authHeader) return null
-  const token = authHeader.replace('Bearer ', '')
-  const { data: { user } } = await supabase.auth.getUser(token)
-  return user || null
+function getServiceClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+}
+
+function getUserIdFromToken(request) {
+  try {
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!token) return null
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString())
+    return payload.sub || null
+  } catch { return null }
 }
 
 export async function POST(request, { params }) {
   try {
-    const supabase = getSupabase()
-    const { id } = await params
-    const user = await getUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userId = getUserIdFromToken(request)
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const { id } = await params
     const { display_name } = await request.json()
+    const supabase = getServiceClient()
 
     const { data, error } = await supabase
       .from('event_registrations')
-      .insert({
-        event_id: id,
-        user_id: user.id,
-        display_name: display_name || user.user_metadata?.full_name || null,
-      })
+      .insert({ event_id: id, user_id: userId, display_name: display_name || null })
       .select()
       .single()
 
@@ -34,27 +34,28 @@ export async function POST(request, { params }) {
       throw error
     }
     return NextResponse.json({ registration: data })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Failed to register' }, { status: 500 })
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
-    const supabase = getSupabase()
+    const userId = getUserIdFromToken(request)
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { id } = await params
-    const user = await getUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const supabase = getServiceClient()
 
     const { error } = await supabase
       .from('event_registrations')
       .delete()
       .eq('event_id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
 
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Failed to cancel registration' }, { status: 500 })
   }
 }

@@ -1,10 +1,23 @@
 import { NextResponse } from 'next/server'
-import { getSupabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { geocodePostcode, haversineDistance, boundingBox } from '@/lib/geocode'
+
+function getServiceClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+}
+
+function getUserIdFromToken(request) {
+  try {
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!token) return null
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString())
+    return payload.sub || null
+  } catch { return null }
+}
 
 export async function GET(request) {
   try {
-    const supabase = getSupabase()
+    const supabase = getServiceClient()
     const { searchParams } = new URL(request.url)
     const postcode = searchParams.get('postcode')
     const radius = parseFloat(searchParams.get('radius') || '10')
@@ -49,13 +62,8 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const supabase = getSupabase()
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user } } = await supabase.auth.getUser(token)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userId = getUserIdFromToken(request)
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
     const { title, game, format, description, venue_name, city, postcode, event_date, max_players, is_public } = body
@@ -67,10 +75,11 @@ export async function POST(request) {
     const coords = await geocodePostcode(postcode)
     if (!coords) return NextResponse.json({ error: 'Invalid postcode — must be a valid UK postcode' }, { status: 400 })
 
+    const supabase = getServiceClient()
     const { data, error } = await supabase
       .from('events')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         title, game, format: format || null, description: description || null,
         venue_name, city,
         postcode: postcode.replace(/\s+/g, '').toUpperCase(),
