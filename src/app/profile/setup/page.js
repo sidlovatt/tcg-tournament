@@ -30,30 +30,29 @@ function SetupForm() {
     if (!/^[a-z0-9_]{3,20}$/.test(val)) { setStatus('invalid'); return }
     setStatus('checking')
     debounceRef.current = setTimeout(async () => {
-      const res = await fetch(`/api/profile/check?username=${val}`)
-      const { available } = await res.json()
-      setStatus(available ? 'available' : 'taken')
+      const { data } = await supabase.from('profiles').select('id').eq('username', val).maybeSingle()
+      setStatus(data ? 'taken' : 'available')
     }, 400)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (status !== 'available') return
+    if (status !== 'available' || !user) return
     setSubmitting(true)
     setError('')
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ username }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Failed to set username'); return }
-      if (setCtxUsername) setCtxUsername(data.username)
+      const clean = username.toLowerCase().trim()
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, username: clean }, { onConflict: 'id' })
+      if (upsertError) {
+        setError(upsertError.code === '23505' ? 'Username already taken' : upsertError.message)
+        return
+      }
+      if (setCtxUsername) setCtxUsername(clean)
       router.replace(next)
-    } catch {
-      setError('Failed to set username')
+    } catch (e) {
+      setError(e?.message || 'Failed to set username')
     } finally {
       setSubmitting(false)
     }
