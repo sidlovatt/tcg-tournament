@@ -19,7 +19,7 @@ export default function CreateEventPage() {
   const debounceRef = useRef(null)
   const [form, setForm] = useState({
     title: '', game: '', format: '', description: '',
-    venue_name: '', city: '', postcode: '',
+    venue_name: '', city: '', postcode: '', lat: '', lng: '',
     event_date: '', event_time: '10:00', max_players: '', is_public: true,
   })
 
@@ -41,8 +41,8 @@ export default function CreateEventPage() {
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&countrycodes=gb&format=json&addressdetails=1&limit=6`,
-          { headers: { 'Accept-Language': 'en-GB' } }
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=6`,
+          { headers: { 'Accept-Language': 'en' } }
         )
         const results = await res.json()
         setSuggestions(results)
@@ -56,7 +56,7 @@ export default function CreateEventPage() {
     const city = addr.city || addr.town || addr.village || addr.county || ''
     const postcode = addr.postcode || ''
     const venueName = s.name || addr.road || ''
-    setForm(f => ({ ...f, venue_name: venueName, city, postcode }))
+    setForm(f => ({ ...f, venue_name: venueName, city, postcode, lat: s.lat || '', lng: s.lon || '' }))
     setAddressQuery(s.display_name)
     setSuggestions([])
     setLocationSet(true)
@@ -170,9 +170,9 @@ export default function CreateEventPage() {
                   <input type="text" value={form.city} onChange={e => update('city', e.target.value)}
                     placeholder="London" required className={inputCls} />
                 </Field>
-                <Field label="Postcode" required>
+                <Field label="Postcode / ZIP">
                   <input type="text" value={form.postcode} onChange={e => update('postcode', e.target.value.toUpperCase())}
-                    placeholder="SW1A 1AA" required className={`${inputCls} font-mono tracking-wider`} />
+                    placeholder="Optional" className={`${inputCls} font-mono tracking-wider`} />
                 </Field>
               </div>
             </>
