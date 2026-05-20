@@ -42,9 +42,9 @@ export default function Home() {
 
         {/* Left: branding + description */}
         <div className="flex flex-col gap-5 justify-between">
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col flex-1 justify-between gap-5">
           <div className="flex items-stretch gap-4">
-            <img src="/icons/icon.png" alt="TCG Tournament" className="w-24 rounded-2xl shrink-0 object-cover" />
+            <img src="/icons/icon.png" alt="TCG Tournament" className="w-24 h-full rounded-2xl shrink-0 object-cover" />
             <div>
               <h1 className="text-2xl font-bold text-slate-100 mb-2">TCG Tournament Manager</h1>
               <p className="text-slate-400 leading-relaxed text-sm">
